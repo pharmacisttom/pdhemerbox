@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>API Login Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="font-family:Arial; padding:20px;">
+
+<h3>API Login Test</h3>
+
+<label>API URL</label><br>
+<input id="apiUrl" style="width:100%; padding:8px;" value="https://script.google.com/macros/s/AKfycbzefCsnddhTB5QicSh7_98lzDHgIp9_GXuPjV7e86F6ZSSlQ5AYJYOvS9SjASDEJaE7xg/exec">
+
+<br><br>
+
+<label>Username</label><br>
+<input id="username" style="width:100%; padding:8px;" value="admin">
+
+<br><br>
+
+<label>Password</label><br>
+<input id="password" type="password" style="width:100%; padding:8px;">
+
+<br><br>
+
+<button onclick="testGet()">Test GET</button>
+<button onclick="testLoginPost()">Test Login POST</button>
+
+<hr>
+
+<pre id="result" style="background:#f1f1f1; padding:15px; white-space:pre-wrap;"></pre>
+
+<script>
+function show(data) {
+  document.getElementById('result').textContent =
+    typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
+async function testGet() {
+  const apiUrl = document.getElementById('apiUrl').value.trim();
+
+  try {
+    const res = await fetch(apiUrl + '?action=masterData');
+    const text = await res.text();
+
+    show({
+      ok: res.ok,
+      status: res.status,
+      response: text
+    });
+
+  } catch (error) {
+    show({
+      error: error.toString()
+    });
+  }
+}
+
+async function testLoginPost() {
+  const apiUrl = document.getElementById('apiUrl').value.trim();
+
+  const data = {
+    action: 'login',
+    username: document.getElementById('username').value.trim(),
+    password: document.getElementById('password').value
+  };
+
+  const params = new URLSearchParams();
+  params.append('data', JSON.stringify(data));
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      body: params
+    });
+
+    const text = await res.text();
+
+    show({
+      ok: res.ok,
+      status: res.status,
+      response: text
+    });
+
+  } catch (error) {
+    show({
+      error: error.toString()
+    });
+  }
+}
+</script>
+
+</body>
+</html>
