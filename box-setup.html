@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ตั้งค่ากล่องยา | Emergency MedBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: #eef7f5;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0d6efd, #198754);
+      color: white;
+      padding: 24px;
+      border-radius: 0 0 28px 28px;
+    }
+
+    .card-custom {
+      border: none;
+      border-radius: 22px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .btn-main {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+    }
+
+    .badge {
+      border-radius: 20px;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
+      <h4 class="fw-bold mb-1">ตั้งค่ากล่องยาฉุกเฉินประจำหน่วยงาน</h4>
+      <div>ห้องยา โรงพยาบาลปลวกแดง</div>
+    </div>
+
+    <a href="dashboard.html" class="btn btn-light rounded-pill">กลับหน้าหลัก</a>
+  </div>
+</div>
+
+<div class="container mb-5">
+
+  <div class="card card-custom mb-4">
+    <div class="card-body p-4">
+
+      <h5 class="fw-bold text-primary mb-3">สร้าง / แก้ไข ประเภทกล่องยา</h5>
+
+      <form id="boxTypeForm">
+
+        <input type="hidden" id="box_type_id">
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">หน่วยงาน</label>
+            <select id="department_id" class="form-select" required></select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">ชื่อกล่องยา</label>
+            <input type="text" id="box_name" class="form-control" placeholder="เช่น กล่องยาฉุกเฉิน ER" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">สถานะ</label>
+            <select id="box_status" class="form-select">
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">รายละเอียด</label>
+            <textarea id="description" class="form-control" rows="2" placeholder="รายละเอียดกล่องยา"></textarea>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-main">บันทึกประเภทกล่องยา</button>
+            <button type="button" class="btn btn-secondary btn-main" onclick="resetBoxTypeForm()">ล้างฟอร์ม</button>
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <div class="card card-custom mb-4">
+    <div class="card-body p-4">
+
+      <h5 class="fw-bold text-primary mb-3">กำหนดรายการยาในกล่อง</h5>
+
+      <form id="boxItemForm">
+
+        <input type="hidden" id="box_item_id">
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">ประเภทกล่องยา</label>
+            <select id="item_box_type_id" class="form-select" required></select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">รายการยา</label>
+            <select id="medicine_id" class="form-select" required></select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">จำนวนมาตรฐาน</label>
+            <input type="number" id="standard_qty" class="form-control" min="0" required>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">จำนวนขั้นต่ำ</label>
+            <input type="number" id="min_qty" class="form-control" min="0" required>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">หน่วย</label>
+            <input type="text" id="item_unit" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">สถานะ</label>
+            <select id="item_status" class="form-select">
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+            </select>
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary btn-main">เพิ่ม / บันทึกรายการยาในกล่อง</button>
+            <button type="button" class="btn btn-secondary btn-main" onclick="resetBoxItemForm()">ล้างฟอร์ม</button>
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <div class="card card-custom mb-4">
+    <div class="card-body p-4">
+
+      <h5 class="fw-bold text-primary mb-3">กำหนดรหัสกล่องยาประจำหน่วยงาน</h5>
+
+      <form id="departmentBoxForm">
+
+        <input type="hidden" id="department_box_id">
+
+        <div class="row g-3">
+
+          <div class="col-md-3">
+            <label class="form-label">หน่วยงาน</label>
+            <select id="db_department_id" class="form-select" required></select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">ประเภทกล่องยา</label>
+            <select id="db_box_type_id" class="form-select" required></select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">รหัสกล่องยา</label>
+            <input type="text" id="box_code" class="form-control" placeholder="เช่น ER-BOX-001" required>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">สถานะ</label>
+            <select id="db_status" class="form-select">
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+            </select>
+          </div>
+
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-main">บันทึกรหัสกล่องยา</button>
+            <button type="button" class="btn btn-secondary btn-main" onclick="resetDepartmentBoxForm()">ล้างฟอร์ม</button>
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <div class="card card-custom">
+    <div class="card-body p-4">
+
+      <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabBoxTypes" type="button">
+            ประเภทกล่องยา
+          </button>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBoxItems" type="button">
+            รายการยาในกล่อง
+          </button>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDepartmentBoxes" type="button">
+            รหัสกล่องยา
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="tabBoxTypes">
+          <div class="table-responsive">
+            <table id="boxTypesTable" class="table table-hover align-middle w-100">
+              <thead class="table-primary">
+                <tr>
+                  <th>รหัส</th>
+                  <th>หน่วยงาน</th>
+                  <th>ชื่อกล่อง</th>
+                  <th>รายละเอียด</th>
+                  <th>สถานะ</th>
+                  <th width="150">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tabBoxItems">
+          <div class="table-responsive">
+            <table id="boxItemsTable" class="table table-hover align-middle w-100">
+              <thead class="table-primary">
+                <tr>
+                  <th>รหัส</th>
+                  <th>ประเภทกล่อง</th>
+                  <th>รายการยา</th>
+                  <th>จำนวนมาตรฐาน</th>
+                  <th>ขั้นต่ำ</th>
+                  <th>หน่วย</th>
+                  <th>สถานะ</th>
+                  <th width="150">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tabDepartmentBoxes">
+          <div class="table-responsive">
+            <table id="departmentBoxesTable" class="table table-hover align-middle w-100">
+              <thead class="table-primary">
+                <tr>
+                  <th>รหัส</th>
+                  <th>หน่วยงาน</th>
+                  <th>ประเภทกล่อง</th>
+                  <th>รหัสกล่องยา</th>
+                  <th>สถานะ</th>
+                  <th width="150">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+
+<script>
+requireLogin();
+requireRole(['admin', 'box_manager']);
+
+const user = getUser();
+
+let departments = [];
+let medicines = [];
+let boxTypes = [];
+let boxItems = [];
+let departmentBoxes = [];
+
+let boxTypesDt = null;
+let boxItemsDt = null;
+let departmentBoxesDt = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadBoxSetupData();
+});
+
+async function loadBoxSetupData() {
+  try {
+    Swal.fire({
+      title: 'กำลังโหลดข้อมูล',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const res = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(getToken()));
+    const result = await res.json();
+
+    Swal.close();
+
+    if (!result.success) {
+      Swal.fire('ผิดพลาด', result.message, 'error');
+      return;
+    }
+
+    departments = result.departments || [];
+    medicines = result.medicines || [];
+    boxTypes = result.box_types || [];
+    boxItems = result.box_items || [];
+    departmentBoxes = result.department_boxes || [];
+
+    renderSelects();
+    renderTables();
+
+  } catch (error) {
+    Swal.fire('โหลดข้อมูลไม่สำเร็จ', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function renderSelects() {
+  renderDepartmentSelect('department_id');
+  renderDepartmentSelect('db_department_id');
+
+  renderBoxTypeSelect('item_box_type_id');
+  renderBoxTypeSelect('db_box_type_id');
+
+  renderMedicineSelect();
+}
+
+function renderDepartmentSelect(id) {
+  const select = document.getElementById(id);
+  select.innerHTML = '<option value="">-- เลือกหน่วยงาน --</option>';
+
+  departments.forEach(d => {
+    select.innerHTML += `
+      <option value="${escapeHtml(d.department_id)}">
+        ${escapeHtml(d.department_name)}
+      </option>
+    `;
+  });
+}
+
+function renderBoxTypeSelect(id) {
+  const select = document.getElementById(id);
+  select.innerHTML = '<option value="">-- เลือกประเภทกล่องยา --</option>';
+
+  boxTypes
+    .filter(b => b.status === 'active')
+    .forEach(b => {
+      select.innerHTML += `
+        <option value="${escapeHtml(b.box_type_id)}">
+          ${escapeHtml(b.box_name)} (${escapeHtml(getDepartmentName(b.department_id))})
+        </option>
+      `;
+    });
+}
+
+function renderMedicineSelect() {
+  const select = document.getElementById('medicine_id');
+  select.innerHTML = '<option value="">-- เลือกรายการยา --</option>';
+
+  medicines
+    .filter(m => m.status === 'active')
+    .forEach(m => {
+      select.innerHTML += `
+        <option value="${escapeHtml(m.medicine_id)}" data-unit="${escapeHtml(m.unit)}">
+          ${escapeHtml(m.medicine_name)} ${escapeHtml(m.strength)}
+        </option>
+      `;
+    });
+}
+
+document.getElementById('medicine_id').addEventListener('change', function() {
+  const selected = this.options[this.selectedIndex];
+  document.getElementById('item_unit').value = selected.getAttribute('data-unit') || '';
+});
+
+document.getElementById('boxTypeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  await saveData({
+    action: 'saveBoxType',
+    token: getToken(),
+    user: user,
+    box_type_id: document.getElementById('box_type_id').value.trim(),
+    department_id: document.getElementById('department_id').value,
+    box_name: document.getElementById('box_name').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    status: document.getElementById('box_status').value
+  });
+});
+
+document.getElementById('boxItemForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  await saveData({
+    action: 'saveBoxItem',
+    token: getToken(),
+    user: user,
+    box_item_id: document.getElementById('box_item_id').value.trim(),
+    box_type_id: document.getElementById('item_box_type_id').value,
+    medicine_id: document.getElementById('medicine_id').value,
+    standard_qty: document.getElementById('standard_qty').value,
+    min_qty: document.getElementById('min_qty').value,
+    unit: document.getElementById('item_unit').value,
+    status: document.getElementById('item_status').value
+  });
+});
+
+document.getElementById('departmentBoxForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  await saveData({
+    action: 'saveDepartmentBox',
+    token: getToken(),
+    user: user,
+    id: document.getElementById('department_box_id').value.trim(),
+    department_id: document.getElementById('db_department_id').value,
+    box_type_id: document.getElementById('db_box_type_id').value,
+    box_code: document.getElementById('box_code').value.trim(),
+    status: document.getElementById('db_status').value
+  });
+});
+
+async function saveData(data) {
+  Swal.fire({
+    title: 'กำลังบันทึกข้อมูล',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire('สำเร็จ', result.message, 'success');
+
+      resetBoxTypeForm();
+      resetBoxItemForm();
+      resetDepartmentBoxForm();
+
+      loadBoxSetupData();
+    } else {
+      Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+  } catch (error) {
+    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function renderTables() {
+  renderBoxTypesTable();
+  renderBoxItemsTable();
+  renderDepartmentBoxesTable();
+}
+
+function renderBoxTypesTable() {
+  const tbody = document.querySelector('#boxTypesTable tbody');
+  tbody.innerHTML = '';
+
+  boxTypes.forEach(b => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${escapeHtml(b.box_type_id)}</td>
+        <td>${escapeHtml(getDepartmentName(b.department_id))}</td>
+        <td>${escapeHtml(b.box_name)}</td>
+        <td>${escapeHtml(b.description)}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editBoxType('${escapeAttr(b.box_type_id)}')">แก้ไข</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteBoxType('${escapeAttr(b.box_type_id)}')">ปิด</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  if (boxTypesDt) boxTypesDt.destroy();
+
+  boxTypesDt = new DataTable('#boxTypesTable', {
+    language: dataTableThai()
+  });
+}
+
+function renderBoxItemsTable() {
+  const tbody = document.querySelector('#boxItemsTable tbody');
+  tbody.innerHTML = '';
+
+  boxItems.forEach(item => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${escapeHtml(item.box_item_id)}</td>
+        <td>${escapeHtml(getBoxTypeName(item.box_type_id))}</td>
+        <td>${escapeHtml(getMedicineName(item.medicine_id))}</td>
+        <td>${escapeHtml(item.standard_qty)}</td>
+        <td>${escapeHtml(item.min_qty)}</td>
+        <td>${escapeHtml(item.unit)}</td>
+        <td>${statusBadge(item.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editBoxItem('${escapeAttr(item.box_item_id)}')">แก้ไข</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteBoxItem('${escapeAttr(item.box_item_id)}')">ปิด</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  if (boxItemsDt) boxItemsDt.destroy();
+
+  boxItemsDt = new DataTable('#boxItemsTable', {
+    language: dataTableThai()
+  });
+}
+
+function renderDepartmentBoxesTable() {
+  const tbody = document.querySelector('#departmentBoxesTable tbody');
+  tbody.innerHTML = '';
+
+  departmentBoxes.forEach(db => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${escapeHtml(db.id)}</td>
+        <td>${escapeHtml(getDepartmentName(db.department_id))}</td>
+        <td>${escapeHtml(getBoxTypeName(db.box_type_id))}</td>
+        <td>${escapeHtml(db.box_code)}</td>
+        <td>${statusBadge(db.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editDepartmentBox('${escapeAttr(db.id)}')">แก้ไข</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteDepartmentBox('${escapeAttr(db.id)}')">ปิด</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  if (departmentBoxesDt) departmentBoxesDt.destroy();
+
+  departmentBoxesDt = new DataTable('#departmentBoxesTable', {
+    language: dataTableThai()
+  });
+}
+
+function editBoxType(id) {
+  const b = boxTypes.find(x => x.box_type_id === id);
+  if (!b) return;
+
+  document.getElementById('box_type_id').value = b.box_type_id || '';
+  document.getElementById('department_id').value = b.department_id || '';
+  document.getElementById('box_name').value = b.box_name || '';
+  document.getElementById('description').value = b.description || '';
+  document.getElementById('box_status').value = b.status || 'active';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function editBoxItem(id) {
+  const item = boxItems.find(x => x.box_item_id === id);
+  if (!item) return;
+
+  document.getElementById('box_item_id').value = item.box_item_id || '';
+  document.getElementById('item_box_type_id').value = item.box_type_id || '';
+  document.getElementById('medicine_id').value = item.medicine_id || '';
+  document.getElementById('standard_qty').value = item.standard_qty || '';
+  document.getElementById('min_qty').value = item.min_qty || '';
+  document.getElementById('item_unit').value = item.unit || '';
+  document.getElementById('item_status').value = item.status || 'active';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function editDepartmentBox(id) {
+  const db = departmentBoxes.find(x => x.id === id);
+  if (!db) return;
+
+  document.getElementById('department_box_id').value = db.id || '';
+  document.getElementById('db_department_id').value = db.department_id || '';
+  document.getElementById('db_box_type_id').value = db.box_type_id || '';
+  document.getElementById('box_code').value = db.box_code || '';
+  document.getElementById('db_status').value = db.status || 'active';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteBoxType(id) {
+  await softDelete('deleteBoxType', 'box_type_id', id);
+}
+
+async function deleteBoxItem(id) {
+  await softDelete('deleteBoxItem', 'box_item_id', id);
+}
+
+async function deleteDepartmentBox(id) {
+  await softDelete('deleteDepartmentBox', 'id', id);
+}
+
+async function softDelete(action, key, id) {
+  const confirm = await Swal.fire({
+    icon: 'warning',
+    title: 'ยืนยันการปิดใช้งาน',
+    text: 'ต้องการปิดใช้งานข้อมูลนี้ใช่หรือไม่',
+    showCancelButton: true,
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  const data = {
+    action: action,
+    token: getToken(),
+    user: user
+  };
+
+  data[key] = id;
+
+  await saveData(data);
+}
+
+function resetBoxTypeForm() {
+  document.getElementById('boxTypeForm').reset();
+  document.getElementById('box_type_id').value = '';
+  document.getElementById('box_status').value = 'active';
+}
+
+function resetBoxItemForm() {
+  document.getElementById('boxItemForm').reset();
+  document.getElementById('box_item_id').value = '';
+  document.getElementById('item_unit').value = '';
+  document.getElementById('item_status').value = 'active';
+}
+
+function resetDepartmentBoxForm() {
+  document.getElementById('departmentBoxForm').reset();
+  document.getElementById('department_box_id').value = '';
+  document.getElementById('db_status').value = 'active';
+}
+
+function getDepartmentName(id) {
+  const d = departments.find(x => x.department_id === id);
+  return d ? d.department_name : id;
+}
+
+function getBoxTypeName(id) {
+  const b = boxTypes.find(x => x.box_type_id === id);
+  return b ? b.box_name : id;
+}
+
+function getMedicineName(id) {
+  const m = medicines.find(x => x.medicine_id === id);
+  return m ? `${m.medicine_name} ${m.strength}` : id;
+}
+
+function statusBadge(status) {
+  if (status === 'active') {
+    return '<span class="badge bg-success">active</span>';
+  }
+
+  return '<span class="badge bg-secondary">inactive</span>';
+}
+
+function dataTableThai() {
+  return {
+    search: 'ค้นหา:',
+    lengthMenu: 'แสดง _MENU_ รายการ',
+    info: 'แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ',
+    paginate: {
+      first: 'แรก',
+      last: 'สุดท้าย',
+      next: 'ถัดไป',
+      previous: 'ก่อนหน้า'
+    },
+    zeroRecords: 'ไม่พบข้อมูล'
+  };
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function escapeAttr(text) {
+  return escapeHtml(text).replaceAll('`', '&#096;');
+}
+</script>
+
+</body>
+</html>
