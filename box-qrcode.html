@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QR Code กล่องยา | Emergency MedBox</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #eef7f5;
+        }
+        
+        .topbar {
+            background: linear-gradient(135deg, #0d6efd, #198754);
+            color: white;
+            padding: 28px;
+            border-radius: 0 0 28px 28px;
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
+        }
+        
+        .qr-box {
+            border: 2px dashed #198754;
+            border-radius: 18px;
+            padding: 20px;
+            background: #fff;
+            text-align: center;
+        }
+        
+        .qr-label {
+            width: 100%;
+            max-width: 380px;
+            margin: auto;
+            background: white;
+            border: 2px solid #198754;
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+        }
+        
+        .qr-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f5132;
+        }
+        
+        .btn-main {
+            border-radius: 16px;
+            padding: 10px 18px;
+            font-weight: 700;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea,
+            #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar mb-4 no-print">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="fw-bold mb-1">สร้าง QR Code ประจำกล่องยา</h4>
+                <div>ห้องยา โรงพยาบาลปลวกแดง</div>
+            </div>
+            <a href="dashboard.html" class="btn btn-light rounded-pill">กลับหน้าหลัก</a>
+        </div>
+    </div>
+
+    <div class="container mb-5 no-print">
+
+        <div class="card card-custom mb-4">
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold text-primary mb-3">เลือกกล่องยา</h5>
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-5">
+                        <label class="form-label">กล่องยา</label>
+                        <select id="boxSelect" class="form-select">
+            <option value="">-- เลือกกล่องยา --</option>
+          </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">URL ปลายทาง</label>
+                        <input type="text" id="targetUrl" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-3 d-grid">
+                        <button class="btn btn-success btn-main" onclick="generateQR()">
+            สร้าง QR Code
+          </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-body p-4">
+
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">ตัวอย่าง QR Code</h5>
+
+                        <div class="qr-box mt-3">
+                            <div id="qrcode" class="d-flex justify-content-center mb-3"></div>
+                            <div id="qrText" class="text-muted">กรุณาเลือกกล่องยา</div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-primary btn-main" onclick="downloadQR()">Download PNG</button>
+                            <button class="btn btn-outline-success btn-main" onclick="window.print()">Print Sticker</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">ข้อมูลกล่องยา</h5>
+
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th width="160">รหัสกล่อง</th>
+                                        <td id="infoBoxCode">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ชื่อกล่อง</th>
+                                        <td id="infoBoxName">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>หน่วยงาน</th>
+                                        <td id="infoDepartment">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>สถานที่ตั้ง</th>
+                                        <td id="infoLocation">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ผู้รับผิดชอบ</th>
+                                        <td id="infoPerson">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>เบอร์โทร</th>
+                                        <td id="infoPhone">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="alert alert-info">
+                            เมื่อสแกน QR Code ระบบจะเปิดหน้า <b>บันทึกการใช้กล่องยา</b> และกรอกรหัสกล่องยาให้อัตโนมัติ
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="printArea" class="my-4">
+        <div class="qr-label">
+            <div class="qr-title">Emergency Drug Box</div>
+            <div class="mb-2">โรงพยาบาลปลวกแดง</div>
+
+            <hr>
+
+            <h4 class="fw-bold" id="printBoxCode">-</h4>
+            <div id="printBoxName" class="mb-2">-</div>
+            <div id="printDepartment" class="mb-3 text-muted">-</div>
+
+            <div id="printQr" class="d-flex justify-content-center mb-3"></div>
+
+            <div class="fw-bold text-success">
+                Scan เพื่อบันทึกการใช้ยา
+            </div>
+
+            <div class="small text-muted mt-2" id="printUrl">-</div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js?v=30"></script>
+    <script src="assets/js/auth.js?v=30"></script>
+
+    <script>
+        requireLogin();
+        requireRole(['admin', 'box_manager']);
+
+        let boxes = [];
+        let departments = [];
+        let currentQR = null;
+        let printQR = null;
+        let selectedBox = null;
+
+        document.addEventListener('DOMContentLoaded', loadBoxes);
+
+        async function loadBoxes() {
+            try {
+                Swal.fire({
+                    title: 'กำลังโหลดข้อมูล',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                const res = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(getToken()));
+                const result = await res.json();
+
+                Swal.close();
+
+                if (!result.success) {
+                    Swal.fire('ผิดพลาด', result.message, 'error');
+                    return;
+                }
+
+                boxes = result.department_boxes || [];
+                departments = result.departments || [];
+
+                renderBoxSelect();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('โหลดข้อมูลไม่สำเร็จ', 'กรุณาตรวจสอบ API', 'error');
+            }
+        }
+
+        function renderBoxSelect() {
+            const select = document.getElementById('boxSelect');
+            select.innerHTML = '<option value="">-- เลือกกล่องยา --</option>';
+
+            boxes
+                .filter(b => b.status === 'active')
+                .forEach(b => {
+                    const boxId = b.box_id || b.id || '';
+                    const boxName = b.box_name || b.box_code || '';
+                    select.innerHTML += `
+        <option value="${escapeHtml(b.box_code)}">
+          ${escapeHtml(b.box_code)} - ${escapeHtml(boxName)} (${escapeHtml(getDepartmentName(b.department_id))})
+        </option>
+      `;
+                });
+        }
+
+        document.getElementById('boxSelect').addEventListener('change', function() {
+            const boxCode = this.value;
+            selectedBox = boxes.find(b => b.box_code === boxCode) || null;
+
+            if (!selectedBox) {
+                clearInfo();
+                return;
+            }
+
+            const url = buildQRUrl(selectedBox);
+            document.getElementById('targetUrl').value = url;
+
+            renderInfo(selectedBox);
+        });
+
+        function generateQR() {
+            if (!selectedBox) {
+                Swal.fire('กรุณาเลือกกล่องยา', '', 'warning');
+                return;
+            }
+
+            const url = buildQRUrl(selectedBox);
+
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('printQr').innerHTML = '';
+
+            currentQR = new QRCode(document.getElementById('qrcode'), {
+                text: url,
+                width: 220,
+                height: 220,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            printQR = new QRCode(document.getElementById('printQr'), {
+                text: url,
+                width: 220,
+                height: 220,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qrText').innerText = url;
+            document.getElementById('printUrl').innerText = url;
+
+            document.getElementById('printBoxCode').innerText = selectedBox.box_code || '-';
+            document.getElementById('printBoxName').innerText = selectedBox.box_name || selectedBox.box_code || '-';
+            document.getElementById('printDepartment').innerText = getDepartmentName(selectedBox.department_id);
+
+            Swal.fire('สร้าง QR Code สำเร็จ', '', 'success');
+        }
+
+        function buildQRUrl(box) {
+            const baseUrl = window.location.origin + window.location.pathname.replace('box-qrcode.html', '');
+            return baseUrl + 'request.html?box=' + encodeURIComponent(box.box_code || '');
+        }
+
+        function renderInfo(box) {
+            document.getElementById('infoBoxCode').innerText = box.box_code || '-';
+            document.getElementById('infoBoxName').innerText = box.box_name || box.box_code || '-';
+            document.getElementById('infoDepartment').innerText = getDepartmentName(box.department_id);
+            document.getElementById('infoLocation').innerText = box.location || '-';
+            document.getElementById('infoPerson').innerText = box.responsible_person || '-';
+            document.getElementById('infoPhone').innerText = box.phone || '-';
+        }
+
+        function clearInfo() {
+            document.getElementById('targetUrl').value = '';
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('printQr').innerHTML = '';
+            document.getElementById('qrText').innerText = 'กรุณาเลือกกล่องยา';
+
+            ['infoBoxCode', 'infoBoxName', 'infoDepartment', 'infoLocation', 'infoPerson', 'infoPhone'].forEach(id => {
+                document.getElementById(id).innerText = '-';
+            });
+        }
+
+        function downloadQR() {
+            const qrContainer = document.getElementById('qrcode');
+            const img = qrContainer.querySelector('img');
+            const canvas = qrContainer.querySelector('canvas');
+
+            if (!img && !canvas) {
+                Swal.fire('ยังไม่มี QR Code', 'กรุณากดสร้าง QR Code ก่อน', 'warning');
+                return;
+            }
+
+            let dataUrl = '';
+
+            if (canvas) {
+                dataUrl = canvas.toDataURL('image/png');
+            } else if (img) {
+                dataUrl = img.src;
+            }
+
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = (selectedBox ? .box_code || 'box-qrcode') + '.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function getDepartmentName(id) {
+            const d = departments.find(x => x.department_id === id);
+            return d ? d.department_name : id || '-';
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", "&#039;");
+        }
+    </script>
+
+</body>
+
+</html>
