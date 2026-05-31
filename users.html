@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จัดการผู้ใช้งาน | Emergency MedBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: #eef7f5;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0d6efd, #198754);
+      color: white;
+      padding: 24px;
+      border-radius: 0 0 28px 28px;
+    }
+
+    .card-custom {
+      border: none;
+      border-radius: 22px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .btn-main {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+    }
+
+    .badge {
+      border-radius: 20px;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
+      <h4 class="fw-bold mb-1">จัดการผู้ใช้งานระบบ</h4>
+      <div>ห้องยา โรงพยาบาลปลวกแดง</div>
+    </div>
+    <a href="dashboard.html" class="btn btn-light rounded-pill">กลับหน้าหลัก</a>
+  </div>
+</div>
+
+<div class="container mb-5">
+
+  <div class="card card-custom mb-4">
+    <div class="card-body p-4">
+
+      <h5 class="fw-bold text-primary mb-3">แก้ไขข้อมูลผู้ใช้งาน</h5>
+
+      <form id="userForm">
+
+        <input type="hidden" id="user_id">
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">ชื่อ-สกุล</label>
+            <input type="text" id="fullname" class="form-control" required>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Username</label>
+            <input type="text" id="username" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">หน่วยงาน</label>
+            <input type="text" id="department" class="form-control" required>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">สถานะ</label>
+            <select id="status" class="form-select" required>
+              <option value="pending">pending</option>
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">สิทธิ์ผู้ใช้งาน</label>
+            <select id="role" class="form-select" required>
+              <option value="requester">ผู้เบิกกล่องยา</option>
+              <option value="box_dispenser">ผู้จ่ายกล่องยา</option>
+              <option value="box_manager">ผู้จัดกล่องยา</option>
+              <option value="admin">แอดมินระบบ</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">รหัสผ่านใหม่</label>
+            <input type="password" id="new_password" class="form-control" placeholder="เว้นว่างถ้าไม่เปลี่ยน">
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-success btn-main">บันทึก</button>
+            <button type="button" class="btn btn-secondary btn-main" onclick="resetForm()">ล้างฟอร์ม</button>
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <div class="card card-custom">
+    <div class="card-body p-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-primary mb-0">รายชื่อผู้ใช้งาน</h5>
+        <button class="btn btn-outline-primary rounded-pill" onclick="loadUsers()">รีเฟรช</button>
+      </div>
+
+      <div class="table-responsive">
+        <table id="usersTable" class="table table-hover align-middle w-100">
+          <thead class="table-primary">
+            <tr>
+              <th>รหัส</th>
+              <th>ชื่อ-สกุล</th>
+              <th>Username</th>
+              <th>สิทธิ์</th>
+              <th>หน่วยงาน</th>
+              <th>สถานะ</th>
+              <th>Last Login</th>
+              <th width="170">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+
+<script>
+requireLogin();
+requireRole(['admin']);
+
+const currentUser = getUser();
+let users = [];
+let dataTable = null;
+
+document.addEventListener('DOMContentLoaded', loadUsers);
+
+async function loadUsers() {
+  try {
+    Swal.fire({
+      title: 'กำลังโหลดข้อมูล',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const res = await fetch(API_URL + '?action=getUsers&token=' + encodeURIComponent(getToken()));
+    const result = await res.json();
+
+    Swal.close();
+
+    if (!result.success) {
+      Swal.fire('ผิดพลาด', result.message, 'error');
+      return;
+    }
+
+    users = result.users || [];
+    renderUsers();
+
+  } catch (error) {
+    Swal.fire('โหลดข้อมูลไม่สำเร็จ', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function renderUsers() {
+  const tbody = document.querySelector('#usersTable tbody');
+  tbody.innerHTML = '';
+
+  users.forEach(u => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${escapeHtml(u.user_id)}</td>
+        <td>${escapeHtml(u.fullname)}</td>
+        <td>${escapeHtml(u.username)}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td>${escapeHtml(u.department)}</td>
+        <td>${statusBadge(u.status)}</td>
+        <td>${formatDate(u.last_login)}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editUser('${escapeAttr(u.user_id)}')">แก้ไข</button>
+          <button class="btn btn-sm btn-danger" onclick="setUserStatus('${escapeAttr(u.user_id)}','inactive')">ปิด</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  if (dataTable) dataTable.destroy();
+
+  dataTable = new DataTable('#usersTable', {
+    language: dataTableThai()
+  });
+}
+
+document.getElementById('userForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const data = {
+    action: 'updateUser',
+    token: getToken(),
+    user: currentUser,
+    user_id: document.getElementById('user_id').value,
+    fullname: document.getElementById('fullname').value.trim(),
+    username: document.getElementById('username').value.trim(),
+    role: document.getElementById('role').value,
+    department: document.getElementById('department').value.trim(),
+    status: document.getElementById('status').value,
+    new_password: document.getElementById('new_password').value
+  };
+
+  if (!data.user_id) {
+    Swal.fire('ยังไม่ได้เลือกผู้ใช้', 'กรุณากดแก้ไขจากตารางก่อน', 'warning');
+    return;
+  }
+
+  Swal.fire({
+    title: 'กำลังบันทึกข้อมูล',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire('สำเร็จ', result.message, 'success');
+      resetForm();
+      loadUsers();
+    } else {
+      Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+  } catch (error) {
+    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API', 'error');
+  }
+});
+
+function editUser(userId) {
+  const u = users.find(x => x.user_id === userId);
+  if (!u) return;
+
+  document.getElementById('user_id').value = u.user_id || '';
+  document.getElementById('fullname').value = u.fullname || '';
+  document.getElementById('username').value = u.username || '';
+  document.getElementById('role').value = u.role || 'requester';
+  document.getElementById('department').value = u.department || '';
+  document.getElementById('status').value = u.status || 'pending';
+  document.getElementById('new_password').value = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function setUserStatus(userId, status) {
+  const confirm = await Swal.fire({
+    icon: 'warning',
+    title: 'ยืนยันการเปลี่ยนสถานะ',
+    text: 'ต้องการเปลี่ยนสถานะผู้ใช้นี้ใช่หรือไม่',
+    showCancelButton: true,
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'setUserStatus',
+        token: getToken(),
+        user: currentUser,
+        user_id: userId,
+        status: status
+      })
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire('สำเร็จ', result.message, 'success');
+      loadUsers();
+    } else {
+      Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+  } catch (error) {
+    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function resetForm() {
+  document.getElementById('userForm').reset();
+  document.getElementById('user_id').value = '';
+  document.getElementById('username').value = '';
+}
+
+function roleBadge(role) {
+  const labels = {
+    admin: 'แอดมินระบบ',
+    box_manager: 'ผู้จัดกล่องยา',
+    box_dispenser: 'ผู้จ่ายกล่องยา',
+    requester: 'ผู้เบิกกล่องยา'
+  };
+
+  const colors = {
+    admin: 'bg-danger',
+    box_manager: 'bg-primary',
+    box_dispenser: 'bg-success',
+    requester: 'bg-secondary'
+  };
+
+  return `<span class="badge ${colors[role] || 'bg-secondary'}">${labels[role] || role}</span>`;
+}
+
+function statusBadge(status) {
+  const colors = {
+    active: 'bg-success',
+    pending: 'bg-warning text-dark',
+    inactive: 'bg-secondary'
+  };
+
+  return `<span class="badge ${colors[status] || 'bg-secondary'}">${escapeHtml(status)}</span>`;
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return escapeHtml(value);
+  return d.toLocaleString('th-TH');
+}
+
+function dataTableThai() {
+  return {
+    search: 'ค้นหา:',
+    lengthMenu: 'แสดง _MENU_ รายการ',
+    info: 'แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ',
+    paginate: {
+      first: 'แรก',
+      last: 'สุดท้าย',
+      next: 'ถัดไป',
+      previous: 'ก่อนหน้า'
+    },
+    zeroRecords: 'ไม่พบข้อมูล'
+  };
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function escapeAttr(text) {
+  return escapeHtml(text).replaceAll('`', '&#096;');
+}
+</script>
+
+</body>
+</html>
