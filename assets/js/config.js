@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxTeqGF1jGciWAyhP4w-NageotGJw9H2emofDDmPpJ_zYhvAjK-3IMwjcsC4FkfZX301g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwJ7lN_hTX3SIWZtO0iLB_CUw-D9jBvPHRSsqcvPuPuF648CQiGN6W_9yqjIB4CtG_ulQ/exec';
 
 const APP_NAME = 'ระบบควบคุมเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต';
 const HOSPITAL_NAME = 'ห้องยา โรงพยาบาลปลวกแดง';
