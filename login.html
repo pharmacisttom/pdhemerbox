@@ -80,43 +80,38 @@
 </div>
 
 <script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
 
 <script>
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
+  const data = {
+    action: 'login',
+    username: document.getElementById('username').value.trim(),
+    password: document.getElementById('password').value
+  };
+
+  const formData = new FormData();
+  formData.append('data', JSON.stringify(data));
 
   Swal.fire({
     title: 'กำลังเข้าสู่ระบบ',
+    text: 'กรุณารอสักครู่',
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading()
   });
 
   try {
-   const data = {
-  action: 'register',
-  fullname: document.getElementById('fullname').value.trim(),
-  username: document.getElementById('username').value.trim(),
-  password: document.getElementById('password').value,
-  department: document.getElementById('department').value,
-  role: document.getElementById('role').value
-};
-
-const formData = new FormData();
-formData.append('data', JSON.stringify(data));
-
-const res = await fetch(API_URL, {
-  method: 'POST',
-  body: formData
-});
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: formData
+    });
 
     const result = await res.json();
 
     if (result.success) {
-      localStorage.setItem('medbox_token', result.token);
-      localStorage.setItem('medbox_user', JSON.stringify(result.user));
+      setSession(result.token, result.user);
 
       Swal.fire({
         icon: 'success',
@@ -132,7 +127,8 @@ const res = await fetch(API_URL, {
     }
 
   } catch (error) {
-    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ Internet หรือ API URL', 'error');
+    console.error(error);
+    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API URL หรือ Deploy Apps Script', 'error');
   }
 });
 </script>
