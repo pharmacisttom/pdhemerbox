@@ -7,7 +7,6 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -18,25 +17,45 @@
 
     .topbar {
       background: linear-gradient(135deg, #0d6efd, #198754);
-      color: #fff;
+      color: white;
       padding: 24px;
       border-radius: 0 0 28px 28px;
     }
 
-    .menu-card {
+    .user-card,
+    .menu-card,
+    .kpi-card {
       border: none;
       border-radius: 22px;
       box-shadow: 0 8px 25px rgba(0,0,0,.08);
-      transition: .2s;
+    }
+
+    .menu-card {
       height: 100%;
+      transition: .2s;
     }
 
     .menu-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-5px);
     }
 
     .menu-icon {
-      font-size: 34px;
+      font-size: 38px;
+    }
+
+    .role-badge {
+      border-radius: 20px;
+      padding: 7px 14px;
+      font-size: .9rem;
+    }
+
+    .kpi-number {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    a {
+      color: inherit;
     }
   </style>
 </head>
@@ -46,51 +65,111 @@
 <div class="topbar mb-4">
   <div class="container d-flex justify-content-between align-items-center">
     <div>
-      <h4 class="fw-bold mb-1">ระบบควบคุมเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต</h4>
-      <div>ห้องยา โรงพยาบาลปลวกแดง</div>
+      <h4 class="fw-bold mb-1">Emergency MedBox Dashboard</h4>
+      <div>ระบบควบคุมเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต</div>
+      <div class="small">ห้องยา โรงพยาบาลปลวกแดง</div>
     </div>
 
-    <button class="btn btn-light rounded-pill" onclick="logout()">ออกจากระบบ</button>
+    <button class="btn btn-light rounded-pill" onclick="logout()">
+      ออกจากระบบ
+    </button>
   </div>
 </div>
 
 <div class="container mb-5">
 
-  <div class="alert alert-primary rounded-4">
-    <div class="fw-bold">ยินดีต้อนรับ: <span id="fullname"></span></div>
-    <div>สิทธิ์: <span id="role"></span> | หน่วยงาน: <span id="department"></span></div>
+  <div class="card user-card mb-4">
+    <div class="card-body p-4">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h5 class="fw-bold text-primary mb-1">
+            ยินดีต้อนรับ <span id="fullname">-</span>
+          </h5>
+          <div>
+            Username: <span id="username">-</span> |
+            หน่วยงาน: <span id="department">-</span>
+          </div>
+        </div>
+
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <span id="roleBadge" class="badge bg-primary role-badge">-</span>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+      <div class="card kpi-card bg-primary text-white">
+        <div class="card-body">
+          <div>รายการเบิกทั้งหมด</div>
+          <div class="kpi-number" id="totalRequests">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card kpi-card bg-warning text-dark">
+        <div class="card-body">
+          <div>รอตรวจสอบ</div>
+          <div class="kpi-number" id="pendingRequests">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card kpi-card bg-success text-white">
+        <div class="card-body">
+          <div>Stock Lot ทั้งหมด</div>
+          <div class="kpi-number" id="totalLots">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card kpi-card bg-danger text-white">
+        <div class="card-body">
+          <div>เติมคืนค้าง</div>
+          <div class="kpi-number" id="pendingReplenish">0</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <h5 class="fw-bold text-primary mb-3">เมนูระบบ</h5>
 
   <div class="row g-4">
 
-    <div class="col-md-4" id="menuRequest">
-      <a href="request.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager,box_dispenser,requester">
+      <a href="request.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">🧾</div>
-            <h5 class="fw-bold mt-3">เบิก/บันทึกการใช้กล่องยา</h5>
-            <div class="text-muted">บันทึกวันเวลาใช้ยา รายการยา จำนวน และแนบรูป</div>
+            <h5 class="fw-bold mt-3">เบิก / บันทึกการใช้กล่องยา</h5>
+            <div class="text-muted">บันทึกการใช้ยา วันเวลา เหตุผล และแนบรูป</div>
           </div>
         </div>
       </a>
     </div>
 
-    <div class="col-md-4" id="menuDispense">
-      <a href="requests-list.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager,box_dispenser">
+      <a href="requests-list.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">📦</div>
-            <h5 class="fw-bold mt-3">ตรวจสอบ/จ่ายกล่องยา</h5>
-            <div class="text-muted">อนุมัติ จ่าย เติมคืน และปิดรายการ</div>
+            <h5 class="fw-bold mt-3">ตรวจสอบรายการเบิก</h5>
+            <div class="text-muted">อนุมัติ จ่าย และปิดรายการเบิกกล่องยา</div>
           </div>
         </div>
       </a>
     </div>
 
-    <div class="col-md-4" id="menuMedicine">
-      <a href="medicines.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager">
+      <a href="medicines.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">💊</div>
             <h5 class="fw-bold mt-3">ทะเบียนยา</h5>
             <div class="text-muted">จัดการรายการยา วิธีผสมยา และคำเตือน</div>
@@ -99,22 +178,46 @@
       </a>
     </div>
 
-    <div class="col-md-4" id="menuBox">
-      <a href="box-setup.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager">
+      <a href="box-setup.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">🧰</div>
             <h5 class="fw-bold mt-3">ตั้งค่ากล่องยา</h5>
-            <div class="text-muted">กำหนดยาแต่ละหน่วยงานและจำนวนมาตรฐาน</div>
+            <div class="text-muted">กำหนดยาและจำนวนมาตรฐานของแต่ละกล่อง</div>
           </div>
         </div>
       </a>
     </div>
 
-    <div class="col-md-4" id="menuUsers">
-      <a href="users.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager,box_dispenser">
+      <a href="stock-lots.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
+            <div class="menu-icon">🏷️</div>
+            <h5 class="fw-bold mt-3">Stock Lot ยา</h5>
+            <div class="text-muted">Lot No, วันผลิต, วันหมดอายุ และจำนวนคงเหลือ</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4 menu-item" data-roles="admin,box_manager,box_dispenser">
+      <a href="replenishment.html" class="text-decoration-none">
+        <div class="card menu-card">
+          <div class="card-body p-4 text-center">
+            <div class="menu-icon">🔄</div>
+            <h5 class="fw-bold mt-3">เติมคืนกล่องยา</h5>
+            <div class="text-muted">ติดตามรายการเติมคืนและเบิกทดแทน</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4 menu-item" data-roles="admin">
+      <a href="users.html" class="text-decoration-none">
+        <div class="card menu-card">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">👥</div>
             <h5 class="fw-bold mt-3">จัดการผู้ใช้งาน</h5>
             <div class="text-muted">เปิดใช้งาน ปิดใช้งาน และกำหนดสิทธิ์</div>
@@ -123,10 +226,10 @@
       </a>
     </div>
 
-    <div class="col-md-4" id="menuLogs">
-      <a href="logs.html" class="text-decoration-none text-dark">
+    <div class="col-md-4 menu-item" data-roles="admin">
+      <a href="logs.html" class="text-decoration-none">
         <div class="card menu-card">
-          <div class="card-body p-4">
+          <div class="card-body p-4 text-center">
             <div class="menu-icon">📋</div>
             <h5 class="fw-bold mt-3">System Logs</h5>
             <div class="text-muted">ตรวจสอบประวัติการใช้งานระบบ</div>
@@ -139,44 +242,73 @@
 
 </div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/auth.js"></script>
+<script src="assets/js/config.js?v=10"></script>
+<script src="assets/js/auth.js?v=10"></script>
 
 <script>
 requireLogin();
 
 const user = getUser();
 
-document.getElementById('fullname').innerText = user.fullname;
-document.getElementById('role').innerText = user.role;
-document.getElementById('department').innerText = user.department;
+document.getElementById('fullname').innerText = user.fullname || '-';
+document.getElementById('username').innerText = user.username || '-';
+document.getElementById('department').innerText = user.department || '-';
+document.getElementById('roleBadge').innerText = getRoleName(user.role);
 
-function hide(id) {
-  document.getElementById(id).style.display = 'none';
+applyRoleMenu();
+loadDashboardSummary();
+
+function applyRoleMenu() {
+  const items = document.querySelectorAll('.menu-item');
+
+  items.forEach(item => {
+    const allowedRoles = item.getAttribute('data-roles').split(',');
+
+    if (!allowedRoles.includes(user.role)) {
+      item.style.display = 'none';
+    }
+  });
 }
 
-if (user.role === 'requester') {
-  hide('menuMedicine');
-  hide('menuBox');
-  hide('menuUsers');
-  hide('menuLogs');
-  hide('menuDispense');
-}
+async function loadDashboardSummary() {
+  try {
+    let totalRequests = 0;
+    let pendingRequests = 0;
+    let totalLots = 0;
+    let pendingReplenish = 0;
 
-if (user.role === 'box_dispenser') {
-  hide('menuMedicine');
-  hide('menuBox');
-  hide('menuUsers');
-  hide('menuLogs');
-}
+    if (['admin', 'box_manager', 'box_dispenser'].includes(user.role)) {
+      const reqRes = await fetch(API_URL + '?action=getRequests&token=' + encodeURIComponent(getToken()));
+      const reqResult = await reqRes.json();
 
-if (user.role === 'box_manager') {
-  hide('menuUsers');
-  hide('menuLogs');
-}
+      if (reqResult.success && Array.isArray(reqResult.requests)) {
+        totalRequests = reqResult.requests.length;
+        pendingRequests = reqResult.requests.filter(r => r.status === 'submitted').length;
+      }
 
-if (user.role === 'admin') {
-  // เห็นทุกเมนู
+      const lotRes = await fetch(API_URL + '?action=getStockLots&token=' + encodeURIComponent(getToken()));
+      const lotResult = await lotRes.json();
+
+      if (lotResult.success && Array.isArray(lotResult.lots)) {
+        totalLots = lotResult.lots.length;
+      }
+
+      const repRes = await fetch(API_URL + '?action=getReplenishments&token=' + encodeURIComponent(getToken()));
+      const repResult = await repRes.json();
+
+      if (repResult.success && Array.isArray(repResult.replenishments)) {
+        pendingReplenish = repResult.replenishments.filter(r => r.status === 'pending').length;
+      }
+    }
+
+    document.getElementById('totalRequests').innerText = totalRequests;
+    document.getElementById('pendingRequests').innerText = pendingRequests;
+    document.getElementById('totalLots').innerText = totalLots;
+    document.getElementById('pendingReplenish').innerText = pendingReplenish;
+
+  } catch (error) {
+    console.error(error);
+  }
 }
 </script>
 
