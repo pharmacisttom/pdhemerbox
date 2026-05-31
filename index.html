@@ -1,352 +1,146 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>ระบบเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Emergency MedBox | โรงพยาบาลปลวกแดง</title>
 
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Google Font Sarabun -->
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
 
-  <style>
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
-      min-height: 100vh;
+body{
+    font-family:'Sarabun',sans-serif;
+    background:linear-gradient(135deg,#0d6efd,#198754);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+.card-main{
+    border:none;
+    border-radius:30px;
+    max-width:650px;
+    width:100%;
+    box-shadow:0 15px 40px rgba(0,0,0,.20);
+}
+
+.logo{
+    width:120px;
+    height:120px;
+    object-fit:contain;
+}
+
+.loading{
+    width:50px;
+    height:50px;
+    border:5px solid #e9ecef;
+    border-top:5px solid #0d6efd;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+    100%{
+        transform:rotate(360deg);
     }
+}
 
-    .app-header {
-      background: linear-gradient(135deg, #0d6efd, #198754);
-      color: white;
-      padding: 28px 18px;
-      border-radius: 0 0 28px 28px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
+.version{
+    font-size:12px;
+    color:#6c757d;
+}
 
-    .card-custom {
-      border: none;
-      border-radius: 22px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    }
+</style>
 
-    .form-control, .form-select {
-      border-radius: 14px;
-      padding: 12px;
-    }
-
-    .btn-main {
-      border-radius: 16px;
-      padding: 12px;
-      font-weight: 600;
-    }
-
-    .badge-status {
-      font-size: 0.85rem;
-      padding: 8px 12px;
-      border-radius: 20px;
-    }
-
-    .table-responsive {
-      border-radius: 18px;
-      overflow: hidden;
-    }
-
-    @media (max-width: 576px) {
-      .app-header h3 {
-        font-size: 1.25rem;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
-  <div class="app-header text-center mb-4">
-    <h3 class="fw-bold mb-1">ระบบควบคุมเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต</h3>
-    <div>ห้องยา โรงพยาบาลปลวกแดง</div>
-  </div>
+<div class="card card-main">
 
-  <div class="container mb-5">
+    <div class="card-body p-5 text-center">
 
-    <div class="row g-4">
+        <img
+            src="https://cdn-icons-png.flaticon.com/512/2966/2966486.png"
+            class="logo mb-4"
+            alt="Emergency MedBox">
 
-      <div class="col-lg-5">
-        <div class="card card-custom">
-          <div class="card-body p-4">
-            <h5 class="fw-bold text-primary mb-3">แบบฟอร์มบันทึกการเบิกใช้ยา</h5>
+        <h2 class="fw-bold text-primary">
+            Emergency MedBox
+        </h2>
 
-            <form id="medForm">
+        <h5 class="text-success">
+            ระบบควบคุมการเบิกจ่ายกล่องยาฉุกเฉินช่วยชีวิต
+        </h5>
 
-              <div class="mb-3">
-                <label class="form-label">หน่วยงานที่เบิก</label>
-                <select class="form-select" id="department" required>
-                  <option value="">-- เลือกหน่วยงาน --</option>
-                  <option>ER</option>
-                  <option>OPD</option>
-                  <option>IPD</option>
-                  <option>LR</option>
-                  <option>OR</option>
-                  <option>ICU</option>
-                  <option>หน่วยงานอื่น</option>
-                </select>
-              </div>
+        <p class="text-muted mb-1">
+            ห้องยา โรงพยาบาลปลวกแดง
+        </p>
 
-              <div class="mb-3">
-                <label class="form-label">รหัสกล่องยา</label>
-                <input type="text" class="form-control" id="box_code" placeholder="เช่น EMB-ER-001" required>
-              </div>
+        <p class="text-muted mb-4">
+            Emergency Drug Box Management System
+        </p>
 
-              <div class="mb-3">
-                <label class="form-label">รายการยา/เวชภัณฑ์ที่ใช้</label>
-                <input type="text" class="form-control" id="drug_name" placeholder="เช่น Adrenaline 1 mg/ml" required>
-              </div>
+        <div class="loading mb-3"></div>
 
-              <div class="row">
-                <div class="col-6 mb-3">
-                  <label class="form-label">จำนวน</label>
-                  <input type="number" class="form-control" id="qty" min="1" required>
-                </div>
-
-                <div class="col-6 mb-3">
-                  <label class="form-label">หน่วย</label>
-                  <select class="form-select" id="unit" required>
-                    <option>amp</option>
-                    <option>vial</option>
-                    <option>tab</option>
-                    <option>tube</option>
-                    <option>ชิ้น</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">เหตุผลการใช้</label>
-                <textarea class="form-control" id="reason" rows="2" placeholder="เช่น CPR, Anaphylaxis, Shock" required></textarea>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">ผู้บันทึก/ผู้เบิก</label>
-                <input type="text" class="form-control" id="requester" required>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">เบอร์โทรติดต่อ</label>
-                <input type="tel" class="form-control" id="phone">
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">แนบรูปภาพกล่องยา/รายการที่ใช้</label>
-                <input type="file" class="form-control" id="photo" accept="image/*">
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">หมายเหตุ</label>
-                <textarea class="form-control" id="note" rows="2"></textarea>
-              </div>
-
-              <button type="submit" class="btn btn-success w-100 btn-main">
-                บันทึกข้อมูล
-              </button>
-
-            </form>
-          </div>
+        <div id="statusText" class="fw-bold">
+            กำลังตรวจสอบการเข้าสู่ระบบ...
         </div>
-      </div>
 
-      <div class="col-lg-7">
-        <div class="card card-custom">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold text-primary mb-0">ประวัติการเบิกใช้</h5>
-              <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="loadData()">รีเฟรช</button>
-            </div>
+        <hr>
 
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead class="table-primary">
-                  <tr>
-                    <th>วันที่</th>
-                    <th>หน่วยงาน</th>
-                    <th>กล่องยา</th>
-                    <th>รายการยา</th>
-                    <th>จำนวน</th>
-                    <th>สถานะ</th>
-                  </tr>
-                </thead>
-                <tbody id="dataTable">
-                  <tr>
-                    <td colspan="6" class="text-center text-muted">กำลังโหลดข้อมูล...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="text-muted small mt-3">
-              *ข้อมูลนี้ใช้เพื่อควบคุมคุณภาพยา ติดตามการใช้ยา และเตรียมเติมคืนกล่องยาฉุกเฉิน
-            </div>
-          </div>
+        <div class="version">
+            Version 1.0.0
         </div>
-      </div>
 
     </div>
-  </div>
+
+</div>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyKE9J5l-Jj7dibjxuepO4Tv6PmXu7aSg4YwEfdPSnjRrRGhq3bwoKFvN0RE17qMSDE1A/exec';
 
-  document.getElementById('medForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+const TOKEN_KEY = 'medbox_token';
+const USER_KEY = 'medbox_user';
 
-    const photoInput = document.getElementById('photo');
-    let photoBase64 = '';
-    let photoName = '';
+function checkSession(){
 
-    if (photoInput.files.length > 0) {
-      const file = photoInput.files[0];
+    const token = localStorage.getItem(TOKEN_KEY);
+    const user = localStorage.getItem(USER_KEY);
 
-      if (file.size > 5 * 1024 * 1024) {
-        Swal.fire('ไฟล์ใหญ่เกินไป', 'กรุณาเลือกรูปภาพไม่เกิน 5MB', 'warning');
-        return;
-      }
+    if(token && user){
 
-      photoBase64 = await toBase64(file);
-      photoName = new Date().getTime() + '_' + file.name;
+        document.getElementById('statusText').innerHTML =
+        'พบข้อมูลผู้ใช้งาน กำลังเข้าสู่ระบบ...';
+
+        setTimeout(() => {
+
+            window.location.href = 'dashboard.html';
+
+        },1500);
+
+    }else{
+
+        document.getElementById('statusText').innerHTML =
+        'ยังไม่ได้เข้าสู่ระบบ กำลังไปหน้า Login...';
+
+        setTimeout(() => {
+
+            window.location.href = 'login.html';
+
+        },1500);
+
     }
 
-    const data = {
-      department: document.getElementById('department').value,
-      box_code: document.getElementById('box_code').value.trim(),
-      drug_name: document.getElementById('drug_name').value.trim(),
-      qty: document.getElementById('qty').value,
-      unit: document.getElementById('unit').value,
-      reason: document.getElementById('reason').value.trim(),
-      requester: document.getElementById('requester').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      note: document.getElementById('note').value.trim(),
-      photoBase64: photoBase64,
-      photoName: photoName
-    };
+}
 
-    Swal.fire({
-      title: 'กำลังบันทึกข้อมูล',
-      text: 'กรุณารอสักครู่',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+window.onload = checkSession;
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกสำเร็จ',
-          text: 'เลขที่รายการ: ' + result.request_id
-        });
-
-        document.getElementById('medForm').reset();
-        loadData();
-      } else {
-        Swal.fire('เกิดข้อผิดพลาด', result.message, 'error');
-      }
-
-    } catch (error) {
-      Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API URL หรือ Internet', 'error');
-    }
-  });
-
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  }
-
-  async function loadData() {
-    const tbody = document.getElementById('dataTable');
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" class="text-center text-muted">กำลังโหลดข้อมูล...</td>
-      </tr>
-    `;
-
-    try {
-      const response = await fetch(API_URL);
-      const rows = await response.json();
-
-      if (!rows.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="text-center text-muted">ยังไม่มีข้อมูล</td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = '';
-
-      rows.reverse().slice(0, 20).forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${formatDate(row.timestamp)}</td>
-            <td>${escapeHtml(row.department)}</td>
-            <td>${escapeHtml(row.box_code)}</td>
-            <td>${escapeHtml(row.drug_name)}</td>
-            <td>${escapeHtml(row.qty)} ${escapeHtml(row.unit)}</td>
-            <td>
-              <span class="badge bg-warning text-dark badge-status">
-                ${escapeHtml(row.status)}
-              </span>
-            </td>
-          </tr>
-        `;
-      });
-
-    } catch (error) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="text-center text-danger">โหลดข้อมูลไม่สำเร็จ</td>
-        </tr>
-      `;
-    }
-  }
-
-  function formatDate(dateValue) {
-    if (!dateValue) return '-';
-
-    const d = new Date(dateValue);
-    return d.toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
-
-  function escapeHtml(text) {
-    if (!text) return '';
-    return String(text)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
-  }
-
-  loadData();
 </script>
 
 </body>
