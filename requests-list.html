@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายการเบิกกล่องยา</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: #eef7f5;
+    }
+    .topbar {
+      background: linear-gradient(135deg, #0d6efd, #198754);
+      color: white;
+      padding: 24px;
+      border-radius: 0 0 28px 28px;
+    }
+    .card-custom {
+      border: none;
+      border-radius: 22px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+    .badge {
+      border-radius: 20px;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
+      <h4 class="fw-bold mb-1">ตรวจสอบรายการเบิกกล่องยา</h4>
+      <div>ห้องยา โรงพยาบาลปลวกแดง</div>
+    </div>
+    <a href="dashboard.html" class="btn btn-light rounded-pill">กลับหน้าหลัก</a>
+  </div>
+</div>
+
+<div class="container mb-5">
+
+  <div class="card card-custom">
+    <div class="card-body p-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-primary mb-0">รายการเบิก/ใช้กล่องยา</h5>
+        <button class="btn btn-outline-primary rounded-pill" onclick="loadRequests()">รีเฟรช</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th>เลขที่</th>
+              <th>วันที่บันทึก</th>
+              <th>หน่วยงาน</th>
+              <th>กล่องยา</th>
+              <th>ผู้เบิก</th>
+              <th>สถานะ</th>
+              <th width="220">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="requestTable">
+            <tr>
+              <td colspan="7" class="text-center text-muted">กำลังโหลดข้อมูล...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+
+<script>
+requireLogin();
+requireRole(['admin', 'box_dispenser', 'box_manager']);
+
+const user = getUser();
+let requests = [];
+
+document.addEventListener('DOMContentLoaded', loadRequests);
+
+async function loadRequests() {
+  const tbody = document.getElementById('requestTable');
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7" class="text-center text-muted">กำลังโหลดข้อมูล...</td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch(API_URL + '?action=getRequests&token=' + encodeURIComponent(getToken()));
+    const result = await res.json();
+
+    if (!result.success) {
+      Swal.fire('ผิดพลาด', result.message, 'error');
+      return;
+    }
+
+    requests = result.requests.reverse();
+    renderRequests();
+
+  } catch (error) {
+    Swal.fire('โหลดข้อมูลไม่สำเร็จ', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function renderRequests() {
+  const tbody = document.getElementById('requestTable');
+
+  if (requests.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted">ยังไม่มีข้อมูล</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  requests.forEach(r => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${escapeHtml(r.request_id)}</td>
+        <td>${formatDate(r.created_at)}</td>
+        <td>${escapeHtml(r.department_id)}</td>
+        <td>${escapeHtml(r.box_code)}</td>
+        <td>${escapeHtml(r.requester_name)}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>
+          <button class="btn btn-sm btn-info text-white" onclick="viewDetail('${r.request_id}')">ดู</button>
+          ${actionButtons(r)}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function actionButtons(r) {
+  if (r.status === 'submitted') {
+    return `
+      <button class="btn btn-sm btn-success" onclick="updateStatus('${r.request_id}', 'approved')">อนุมัติ</button>
+      <button class="btn btn-sm btn-danger" onclick="updateStatus('${r.request_id}', 'cancelled')">ยกเลิก</button>
+    `;
+  }
+
+  if (r.status === 'approved') {
+    return `
+      <button class="btn btn-sm btn-primary" onclick="updateStatus('${r.request_id}', 'dispensed')">จ่ายแล้ว</button>
+    `;
+  }
+
+  if (r.status === 'dispensed') {
+    return `
+      <button class="btn btn-sm btn-dark" onclick="updateStatus('${r.request_id}', 'completed')">ปิดรายการ</button>
+    `;
+  }
+
+  return '';
+}
+
+function statusBadge(status) {
+  const map = {
+    submitted: 'bg-warning text-dark',
+    approved: 'bg-success',
+    dispensed: 'bg-primary',
+    completed: 'bg-dark',
+    cancelled: 'bg-danger'
+  };
+
+  const label = {
+    submitted: 'รอตรวจสอบ',
+    approved: 'อนุมัติแล้ว',
+    dispensed: 'จ่ายแล้ว',
+    completed: 'เสร็จสิ้น',
+    cancelled: 'ยกเลิก'
+  };
+
+  return `<span class="badge ${map[status] || 'bg-secondary'}">${label[status] || status}</span>`;
+}
+
+async function viewDetail(requestId) {
+  const r = requests.find(x => x.request_id === requestId);
+
+  if (!r) return;
+
+  let html = `
+    <div class="text-start">
+      <p><b>เลขที่:</b> ${escapeHtml(r.request_id)}</p>
+      <p><b>หน่วยงาน:</b> ${escapeHtml(r.department_id)}</p>
+      <p><b>กล่องยา:</b> ${escapeHtml(r.box_code)}</p>
+      <p><b>ผู้เบิก:</b> ${escapeHtml(r.requester_name)}</p>
+      <p><b>วันเวลาที่ใช้ยา:</b> ${escapeHtml(r.usage_datetime)}</p>
+      <p><b>เหตุผล:</b> ${escapeHtml(r.reason)}</p>
+      <p><b>หมายเหตุ:</b> ${escapeHtml(r.note)}</p>
+  `;
+
+  if (r.photo_url) {
+    html += `<p><a href="${r.photo_url}" target="_blank">เปิดรูปภาพแนบ</a></p>`;
+  }
+
+  html += `</div>`;
+
+  Swal.fire({
+    title: 'รายละเอียดรายการ',
+    html: html,
+    width: 650
+  });
+}
+
+async function updateStatus(requestId, status) {
+  const confirm = await Swal.fire({
+    icon: 'question',
+    title: 'ยืนยันการเปลี่ยนสถานะ',
+    text: 'ต้องการเปลี่ยนสถานะรายการนี้ใช่หรือไม่',
+    showCancelButton: true,
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  Swal.fire({
+    title: 'กำลังบันทึก',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateRequestStatus',
+        token: getToken(),
+        user: user,
+        request_id: requestId,
+        status: status
+      })
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire('สำเร็จ', result.message, 'success');
+      loadRequests();
+    } else {
+      Swal.fire('ไม่สำเร็จ', result.message, 'error');
+    }
+
+  } catch (error) {
+    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API', 'error');
+  }
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('th-TH');
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+</script>
+
+</body>
+</html>
