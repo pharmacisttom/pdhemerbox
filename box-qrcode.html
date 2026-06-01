@@ -368,7 +368,7 @@
 
             const a = document.createElement('a');
             a.href = dataUrl;
-            a.download = (selectedBox ? .box_code || 'box-qrcode') + '.png';
+            a.download = (selectedBox?.box_code || 'box-qrcode') + '.png';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

@@ -189,7 +189,7 @@
 
           <div class="col-md-3">
             <label class="form-label">รหัสกล่องยา</label>
-            <input type="text" id="box_code" class="form-control" placeholder="เช่น ER-BOX-001" required>
+            <input type="text" id="box_code" class="form-control" placeholder="ระบบสร้างให้อัตโนมัติ" readonly required>
           </div>
 
           <div class="col-md-2">
@@ -417,6 +417,46 @@ document.getElementById('medicine_id').addEventListener('change', function() {
   const selected = this.options[this.selectedIndex];
   document.getElementById('item_unit').value = selected.getAttribute('data-unit') || '';
 });
+
+document.getElementById('db_department_id').addEventListener('change', refreshGeneratedBoxCode);
+document.getElementById('db_box_type_id').addEventListener('change', refreshGeneratedBoxCode);
+
+function refreshGeneratedBoxCode() {
+  if (document.getElementById('department_box_id').value.trim()) return;
+
+  const departmentId = document.getElementById('db_department_id').value;
+  const boxTypeId = document.getElementById('db_box_type_id').value;
+  document.getElementById('box_code').value = generateBoxCode(departmentId, boxTypeId);
+}
+
+function generateBoxCode(departmentId, boxTypeId) {
+  if (!departmentId || !boxTypeId) return '';
+
+  const departmentPart = normalizeCodePart(departmentId);
+  const boxType = boxTypes.find(item => sameId(item.box_type_id, boxTypeId));
+  const typeSource = boxType ? boxType.box_type_id || boxType.box_name : boxTypeId;
+  const typePart = normalizeCodePart(typeSource);
+  const prefix = `${departmentPart}-${typePart}`;
+  const existingNumbers = departmentBoxes
+    .filter(item => item.status === 'active')
+    .filter(item => sameId(item.department_id, departmentId) && sameId(item.box_type_id, boxTypeId))
+    .map(item => {
+      const match = String(item.box_code || '').match(/(\d+)$/);
+      return match ? Number(match[1]) : 0;
+    });
+  const nextNumber = Math.max(0, ...existingNumbers) + 1;
+
+  return `${prefix}-${String(nextNumber).padStart(3, '0')}`;
+}
+
+function normalizeCodePart(value) {
+  const text = String(value || '')
+    .normalize('NFKD')
+    .replace(/[^\w]+/g, '')
+    .toUpperCase();
+
+  return text.slice(0, 8) || 'BOX';
+}
 
 document.getElementById('boxTypeForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -679,6 +719,7 @@ function resetDepartmentBoxForm() {
   document.getElementById('departmentBoxForm').reset();
   document.getElementById('department_box_id').value = '';
   document.getElementById('db_status').value = 'active';
+  document.getElementById('box_code').value = '';
 }
 
 function getDepartmentName(id) {
@@ -694,6 +735,10 @@ function getBoxTypeName(id) {
 function getMedicineName(id) {
   const m = medicines.find(x => x.medicine_id === id);
   return m ? `${m.medicine_name} ${m.strength}` : id;
+}
+
+function sameId(a, b) {
+  return String(a ?? '') === String(b ?? '');
 }
 
 function statusBadge(status) {

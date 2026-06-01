@@ -33,6 +33,15 @@
       padding: 12px;
       font-weight: 600;
     }
+
+    .privacy-note {
+      background: #f8fafc;
+      border: 1px solid #dbe4ef;
+      border-radius: 16px;
+      color: #475569;
+      font-size: .92rem;
+      padding: 12px 14px;
+    }
   </style>
 </head>
 
@@ -49,6 +58,11 @@
           <div class="text-center text-muted mb-4">ระบบกล่องยาฉุกเฉินช่วยชีวิต</div>
 
           <form id="registerForm">
+
+            <div class="privacy-note mb-3">
+              ก่อนลงทะเบียน ระบบจะแจ้งการใช้ข้อมูลส่วนบุคคลและข้อมูลบนอุปกรณ์ตามวัตถุประสงค์ของงานกล่องยาฉุกเฉิน
+              <button type="button" class="btn btn-link p-0 align-baseline" onclick="showPrivacyNotice()">อ่านประกาศ PDPA/คุกกี้</button>
+            </div>
 
             <div class="mb-3">
               <label class="form-label">ชื่อ-สกุล</label>
@@ -109,10 +123,25 @@
 </div>
 
 <script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  ensurePrivacyConsent({
+    redirectOnReject: true
+  });
+});
+
 document.getElementById('registerForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  const accepted = await ensurePrivacyConsent({
+    redirectOnReject: true
+  });
+
+  if (!accepted) {
+    return;
+  }
 
   const data = {
     action: 'register',

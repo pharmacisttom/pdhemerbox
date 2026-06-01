@@ -107,13 +107,34 @@ body{
 
 const TOKEN_KEY = 'medbox_token';
 const USER_KEY = 'medbox_user';
+const PRIVACY_CONSENT_KEY = 'medbox_privacy_consent_v1';
+
+function hasPrivacyConsent(){
+    try{
+        const consent = JSON.parse(localStorage.getItem(PRIVACY_CONSENT_KEY));
+        return Boolean(consent && consent.accepted === true && consent.version === 1);
+    }catch(e){
+        return false;
+    }
+}
 
 function checkSession(){
 
     const token = localStorage.getItem(TOKEN_KEY);
     const user = localStorage.getItem(USER_KEY);
 
-    if(token && user){
+    if(!hasPrivacyConsent()){
+
+        document.getElementById('statusText').innerHTML =
+        'กรุณารับทราบประกาศ PDPA/คุกกี้ก่อนใช้งานระบบ กำลังไปหน้า Login...';
+
+        setTimeout(() => {
+
+            window.location.href = 'login.html';
+
+        },1500);
+
+    }else if(token && user){
 
         document.getElementById('statusText').innerHTML =
         'พบข้อมูลผู้ใช้งาน กำลังเข้าสู่ระบบ...';

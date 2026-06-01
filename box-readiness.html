@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ตรวจความพร้อมกล่องยา | Emergency MedBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #dbe4ef;
+      --page: #eef7f5;
+      --primary: #0d6efd;
+      --success: #198754;
+      --warning: #b7791f;
+      --danger: #dc3545;
+    }
+
+    body {
+      background: var(--page);
+      color: var(--ink);
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #0d6efd, #198754);
+      color: #fff;
+      padding: 24px;
+      border-radius: 0 0 28px 28px;
+    }
+
+    .page-title {
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .panel,
+    .box-card,
+    .summary-card {
+      background: #fff;
+      border: 1px solid rgba(219, 228, 239, .9);
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, .08);
+    }
+
+    .summary-card {
+      min-height: 132px;
+      padding: 20px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .summary-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-top: 14px;
+    }
+
+    .summary-hint {
+      color: var(--muted);
+      font-size: .95rem;
+      margin-top: 8px;
+    }
+
+    .panel-head {
+      border-bottom: 1px solid var(--line);
+      padding: 18px 20px;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 8px;
+      padding: 11px 12px;
+    }
+
+    .btn-main {
+      border-radius: 8px;
+      font-weight: 700;
+      min-height: 44px;
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .step-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .box-card {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .box-card-head {
+      border-bottom: 1px solid var(--line);
+      padding: 18px;
+    }
+
+    .box-card-body {
+      padding: 18px;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .status-ready {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .status-watch {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-risk {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .check-item {
+      align-items: flex-start;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+
+    .check-mark {
+      border-radius: 50%;
+      flex: 0 0 auto;
+      font-size: .82rem;
+      font-weight: 800;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      width: 24px;
+    }
+
+    .check-ok .check-mark {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .check-bad .check-mark {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .check-warn .check-mark {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .medicine-row {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    .medicine-row:last-child {
+      border-bottom: none;
+    }
+
+    .empty-state {
+      border: 1px dashed #b6c8da;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 34px 18px;
+      text-align: center;
+    }
+
+    .text-muted-strong {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    @media (max-width: 992px) {
+      .stepper {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .topbar .container {
+        align-items: flex-start !important;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      .stepper {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar mb-4">
+    <div class="container d-flex justify-content-between align-items-center gap-3">
+      <div>
+        <h4 class="page-title mb-1">ตรวจความพร้อมกล่องยา</h4>
+        <div>ดูสถานะกล่องยา ตรวจจุดที่ต้องแก้ และไปทำขั้นตอนถัดไปจากหน้าเดียว</div>
+      </div>
+
+      <div class="toolbar">
+        <a href="box-setup.html" class="btn btn-light btn-main role-action" data-roles="admin,box_manager">ตั้งค่ากล่อง</a>
+        <a href="box-qrcode.html" class="btn btn-outline-light btn-main role-action" data-roles="admin,box_manager">ทำ QR</a>
+        <a href="dashboard.html" class="btn btn-outline-light btn-main">หน้าหลัก</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="container mb-5">
+
+    <section class="panel mb-4">
+      <div class="panel-head d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <div>
+          <h5 class="fw-bold mb-1">ขั้นตอนใช้งานที่แนะนำ</h5>
+          <div class="text-muted">เริ่มจากตั้งค่ากล่องให้ครบ ตรวจความพร้อม แล้วใช้งานผ่าน QR เพื่อลดการกรอกข้อมูลซ้ำ</div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-main" onclick="loadReadinessData()">รีเฟรชข้อมูล</button>
+      </div>
+      <div class="panel-body">
+        <div class="stepper">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="fw-bold">ตั้งค่ากล่อง</div>
+            <div class="text-muted small">กำหนดประเภทกล่อง รายการยา และรหัสกล่องประจำหน่วยงาน</div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="fw-bold">ลง Stock Lot</div>
+            <div class="text-muted small">ผูก lot ยาเข้ากับรหัสกล่อง พร้อมวันหมดอายุและจำนวนคงเหลือ</div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="fw-bold">ติด QR</div>
+            <div class="text-muted small">พิมพ์ QR ประจำกล่อง เพื่อเปิดหน้าบันทึกการใช้พร้อมรหัสกล่องอัตโนมัติ</div>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="fw-bold">ตรวจความพร้อม</div>
+            <div class="text-muted small">ตรวจรายการขาด จำนวนต่ำ และยาที่ใกล้หมดอายุก่อนนำกล่องไปใช้งาน</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="summary-card">
+          <div class="summary-label">กล่องที่เปิดใช้งาน</div>
+          <div class="summary-value text-primary" id="summaryActiveBoxes">0</div>
+          <div class="summary-hint">จากข้อมูลตั้งค่ากล่อง</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="summary-card">
+          <div class="summary-label">พร้อมใช้งาน</div>
+          <div class="summary-value text-success" id="summaryReadyBoxes">0</div>
+          <div class="summary-hint">มีรายการครบและไม่มีความเสี่ยงเร่งด่วน</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="summary-card">
+          <div class="summary-label">ต้องติดตาม</div>
+          <div class="summary-value text-warning" id="summaryWatchBoxes">0</div>
+          <div class="summary-hint">มีจำนวนต่ำหรือใกล้หมดอายุ</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="summary-card">
+          <div class="summary-label">ต้องแก้ก่อนใช้</div>
+          <div class="summary-value text-danger" id="summaryRiskBoxes">0</div>
+          <div class="summary-hint">ยังไม่ครบ, หมด stock หรือหมดอายุแล้ว</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel mb-4">
+      <div class="panel-head">
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-4">
+            <label for="departmentFilter" class="form-label">หน่วยงาน</label>
+            <select id="departmentFilter" class="form-select" onchange="renderReadiness()">
+              <option value="">ทุกหน่วยงาน</option>
+            </select>
+          </div>
+
+          <div class="col-lg-4">
+            <label for="statusFilter" class="form-label">สถานะ</label>
+            <select id="statusFilter" class="form-select" onchange="renderReadiness()">
+              <option value="">ทุกสถานะ</option>
+              <option value="ready">พร้อมใช้งาน</option>
+              <option value="watch">ต้องติดตาม</option>
+              <option value="risk">ต้องแก้ก่อนใช้</option>
+            </select>
+          </div>
+
+          <div class="col-lg-4">
+            <label for="searchBox" class="form-label">ค้นหา</label>
+            <input type="search" id="searchBox" class="form-control" placeholder="รหัสกล่อง, ชื่อกล่อง, หน่วยงาน" oninput="renderReadiness()">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-3">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-3">
+        <div>
+          <h5 class="fw-bold mb-1">รายการกล่องยา</h5>
+          <div class="text-muted">เลือกกล่องเพื่อดูรายการยาที่ต้องเติมหรือควรเปลี่ยน lot</div>
+        </div>
+        <div class="text-muted-strong" id="lastUpdatedText">-</div>
+      </div>
+
+      <div class="row g-4" id="readinessGrid">
+        <div class="col-12">
+          <div class="empty-state">กำลังโหลดข้อมูล...</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="modal fade" id="boxDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold" id="modalTitle">รายละเอียดกล่องยา</h5>
+            <div class="text-muted" id="modalSubtitle">-</div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+        </div>
+
+        <div class="modal-body" id="modalBody"></div>
+
+        <div class="modal-footer">
+          <a id="modalRequestLink" href="request.html" class="btn btn-success btn-main">บันทึกการใช้</a>
+          <a href="replenishment.html" class="btn btn-primary btn-main">ไปหน้าเติมคืน</a>
+          <a href="box-qrcode.html" class="btn btn-outline-primary btn-main role-action" data-roles="admin,box_manager">ทำ QR</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/config.js?v=50"></script>
+  <script src="assets/js/auth.js?v=50"></script>
+
+  <script>
+    requireLogin();
+    requireRole(['admin', 'box_manager', 'box_dispenser']);
+
+    const currentUser = getUser();
+
+    let departments = [];
+    let medicines = [];
+    let boxTypes = [];
+    let boxItems = [];
+    let departmentBoxes = [];
+    let lots = [];
+    let readinessRows = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyActionRoles();
+      loadReadinessData();
+    });
+
+    function applyActionRoles() {
+      document.querySelectorAll('.role-action').forEach(item => {
+        const roles = (item.getAttribute('data-roles') || '').split(',');
+        item.style.display = roles.includes(currentUser?.role) ? '' : 'none';
+      });
+    }
+
+    async function loadReadinessData() {
+      try {
+        Swal.fire({
+          title: 'กำลังโหลดข้อมูล',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        const token = encodeURIComponent(getToken());
+        const setupRes = await fetch(API_URL + '?action=getBoxSetupData&token=' + token);
+        const setupResult = await setupRes.json();
+
+        if (!setupResult.success) {
+          throw new Error(setupResult.message || 'โหลดข้อมูลตั้งค่ากล่องไม่สำเร็จ');
+        }
+
+        const lotRes = await fetch(API_URL + '?action=getStockLots&token=' + token);
+        const lotResult = await lotRes.json();
+
+        if (!lotResult.success) {
+          throw new Error(lotResult.message || 'โหลดข้อมูล Stock Lot ไม่สำเร็จ');
+        }
+
+        departments = mergeById(setupResult.departments || [], lotResult.departments || [], 'department_id');
+        medicines = mergeById(setupResult.medicines || [], lotResult.medicines || [], 'medicine_id');
+        boxTypes = setupResult.box_types || [];
+        boxItems = setupResult.box_items || [];
+        departmentBoxes = setupResult.department_boxes || [];
+        lots = lotResult.lots || [];
+
+        renderDepartmentFilter();
+        buildReadinessRows();
+        renderReadiness();
+        setLastUpdated();
+        Swal.close();
+      } catch (error) {
+        console.error(error);
+        Swal.fire('โหลดข้อมูลไม่สำเร็จ', error.message || 'กรุณาตรวจสอบ API หรือ Internet', 'error');
+      }
+    }
+
+    function mergeById(primary, secondary, key) {
+      const map = new Map();
+      [...secondary, ...primary].forEach(item => {
+        if (item && item[key]) map.set(item[key], item);
+      });
+      return Array.from(map.values());
+    }
+
+    function renderDepartmentFilter() {
+      const select = document.getElementById('departmentFilter');
+      const current = select.value;
+
+      select.innerHTML = '<option value="">ทุกหน่วยงาน</option>';
+      departments
+        .filter(d => !d.status || d.status === 'active')
+        .forEach(d => {
+          select.innerHTML += `<option value="${escapeHtml(d.department_id)}">${escapeHtml(d.department_name)}</option>`;
+        });
+
+      select.value = current;
+    }
+
+    function buildReadinessRows() {
+      readinessRows = departmentBoxes
+        .filter(box => box.status === 'active')
+        .map(box => {
+          const expectedItems = boxItems.filter(item => sameId(item.box_type_id, box.box_type_id) && item.status === 'active');
+          const activeLots = lots.filter(lot => sameId(lot.box_code, box.box_code) && lot.status === 'active');
+          const itemChecks = expectedItems.map(item => buildItemCheck(item, activeLots));
+          const missingCount = itemChecks.filter(item => item.totalQty <= 0).length;
+          const lowCount = itemChecks.filter(item => item.totalQty > 0 && item.totalQty < Number(item.minQty || 0)).length;
+          const expiredCount = activeLots.filter(lot => daysLeft(lot.exp_date) < 0).length;
+          const nearExpiryCount = activeLots.filter(lot => {
+            const days = daysLeft(lot.exp_date);
+            return days >= 0 && days <= 90;
+          }).length;
+
+          let status = 'ready';
+          if (expectedItems.length === 0 || activeLots.length === 0 || missingCount > 0 || expiredCount > 0) {
+            status = 'risk';
+          } else if (lowCount > 0 || nearExpiryCount > 0) {
+            status = 'watch';
+          }
+
+          return {
+            box,
+            boxType: boxTypes.find(type => sameId(type.box_type_id, box.box_type_id)) || {},
+            expectedItems,
+            activeLots,
+            itemChecks,
+            missingCount,
+            lowCount,
+            expiredCount,
+            nearExpiryCount,
+            status
+          };
+        });
+    }
+
+    function buildItemCheck(item, activeLots) {
+      const medicineLots = activeLots.filter(lot => sameId(lot.medicine_id, item.medicine_id));
+      const usableLots = medicineLots.filter(lot => daysLeft(lot.exp_date) >= 0);
+      const totalQty = usableLots.reduce((sum, lot) => sum + Number(lot.current_qty || 0), 0);
+      const nearestLot = medicineLots
+        .slice()
+        .sort((a, b) => daysLeft(a.exp_date) - daysLeft(b.exp_date))[0] || null;
+
+      return {
+        medicineId: item.medicine_id,
+        medicineName: getMedicineName(item.medicine_id),
+        standardQty: Number(item.standard_qty || 0),
+        minQty: Number(item.min_qty || 0),
+        unit: item.unit || getMedicineUnit(item.medicine_id),
+        totalQty,
+        nearestLot
+      };
+    }
+
+    function renderReadiness() {
+      renderSummary();
+
+      const grid = document.getElementById('readinessGrid');
+      const departmentId = document.getElementById('departmentFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const search = document.getElementById('searchBox').value.trim().toLowerCase();
+
+      const rows = readinessRows.filter(row => {
+        const box = row.box;
+        const departmentName = getDepartmentName(box.department_id);
+        const haystack = `${box.box_code || ''} ${box.box_name || ''} ${departmentName} ${row.boxType.box_name || ''}`.toLowerCase();
+
+        if (departmentId && !sameId(box.department_id, departmentId)) return false;
+        if (status && row.status !== status) return false;
+        if (search && !haystack.includes(search)) return false;
+        return true;
+      });
+
+      if (rows.length === 0) {
+        grid.innerHTML = '<div class="col-12"><div class="empty-state">ไม่พบกล่องยาตามเงื่อนไขที่เลือก</div></div>';
+        return;
+      }
+
+      grid.innerHTML = rows.map(row => renderBoxCard(row)).join('');
+    }
+
+    function renderSummary() {
+      document.getElementById('summaryActiveBoxes').innerText = readinessRows.length;
+      document.getElementById('summaryReadyBoxes').innerText = readinessRows.filter(row => row.status === 'ready').length;
+      document.getElementById('summaryWatchBoxes').innerText = readinessRows.filter(row => row.status === 'watch').length;
+      document.getElementById('summaryRiskBoxes').innerText = readinessRows.filter(row => row.status === 'risk').length;
+    }
+
+    function renderBoxCard(row) {
+      const box = row.box;
+      const statusText = getStatusText(row.status);
+      const statusClass = getStatusClass(row.status);
+      const departmentName = getDepartmentName(box.department_id);
+      const expectedText = row.expectedItems.length ? `${row.expectedItems.length} รายการมาตรฐาน` : 'ยังไม่ได้กำหนดรายการยา';
+
+      return `
+        <div class="col-lg-6">
+          <article class="box-card">
+            <div class="box-card-head d-flex justify-content-between gap-3">
+              <div>
+                <h5 class="fw-bold mb-1">${escapeHtml(box.box_code || '-')}</h5>
+                <div class="text-muted">${escapeHtml(box.box_name || row.boxType.box_name || 'กล่องยา')}</div>
+                <div class="small text-muted mt-1">${escapeHtml(departmentName)}</div>
+              </div>
+              <div>
+                <span class="status-pill ${statusClass}">${statusText}</span>
+              </div>
+            </div>
+
+            <div class="box-card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-sm-6">
+                  <div class="text-muted small">รายการมาตรฐาน</div>
+                  <div class="fw-bold">${escapeHtml(expectedText)}</div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="text-muted small">Stock lot ในกล่อง</div>
+                  <div class="fw-bold">${row.activeLots.length} lot</div>
+                </div>
+              </div>
+
+              <ul class="check-list mb-3">
+                ${renderChecklist(row)}
+              </ul>
+
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary btn-main" onclick="openBoxDetail('${escapeAttr(box.box_code)}')">ดูรายละเอียด</button>
+                <a class="btn btn-success btn-main" href="request.html?box=${encodeURIComponent(box.box_code || '')}">บันทึกการใช้</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      `;
+    }
+
+    function renderChecklist(row) {
+      const items = [
+        {
+          level: row.expectedItems.length > 0 ? 'ok' : 'bad',
+          text: row.expectedItems.length > 0 ? 'มีรายการยามาตรฐานครบตามประเภทกล่อง' : 'ยังไม่ได้กำหนดรายการยามาตรฐานให้ประเภทกล่องนี้'
+        },
+        {
+          level: row.activeLots.length > 0 ? 'ok' : 'bad',
+          text: row.activeLots.length > 0 ? 'มี Stock Lot ที่เปิดใช้งานในกล่อง' : 'ยังไม่มี Stock Lot ที่ผูกกับรหัสกล่องนี้'
+        },
+        {
+          level: row.missingCount === 0 ? 'ok' : 'bad',
+          text: row.missingCount === 0 ? 'ไม่พบรายการยาที่ขาด' : `มียาที่ขาด ${row.missingCount} รายการ`
+        },
+        {
+          level: row.lowCount === 0 ? 'ok' : 'warn',
+          text: row.lowCount === 0 ? 'จำนวนคงเหลือไม่ต่ำกว่าขั้นต่ำ' : `จำนวนต่ำกว่าขั้นต่ำ ${row.lowCount} รายการ`
+        },
+        {
+          level: row.expiredCount === 0 && row.nearExpiryCount === 0 ? 'ok' : (row.expiredCount > 0 ? 'bad' : 'warn'),
+          text: buildExpiryText(row)
+        }
+      ];
+
+      return items.map(item => `
+        <li class="check-item check-${item.level}">
+          <span class="check-mark">${item.level === 'ok' ? '✓' : '!'}</span>
+          <span>${escapeHtml(item.text)}</span>
+        </li>
+      `).join('');
+    }
+
+    function buildExpiryText(row) {
+      if (row.expiredCount > 0) return `พบยาหมดอายุแล้ว ${row.expiredCount} lot`;
+      if (row.nearExpiryCount > 0) return `พบยาใกล้หมดอายุใน 90 วัน ${row.nearExpiryCount} lot`;
+      return 'ไม่พบยาหมดอายุหรือใกล้หมดอายุใน 90 วัน';
+    }
+
+    function openBoxDetail(boxCode) {
+      const row = readinessRows.find(item => sameId(item.box.box_code, boxCode));
+      if (!row) return;
+
+      document.getElementById('modalTitle').innerText = row.box.box_code || 'รายละเอียดกล่องยา';
+      document.getElementById('modalSubtitle').innerText = `${row.box.box_name || row.boxType.box_name || 'กล่องยา'} | ${getDepartmentName(row.box.department_id)}`;
+      document.getElementById('modalRequestLink').href = `request.html?box=${encodeURIComponent(row.box.box_code || '')}`;
+
+      const expectedHtml = row.itemChecks.length
+        ? row.itemChecks.map(renderMedicineCheckRow).join('')
+        : '<div class="empty-state">ยังไม่ได้กำหนดรายการยามาตรฐานให้กล่องประเภทนี้</div>';
+
+      const lotHtml = row.activeLots.length
+        ? row.activeLots
+          .slice()
+          .sort((a, b) => daysLeft(a.exp_date) - daysLeft(b.exp_date))
+          .map(renderLotRow)
+          .join('')
+        : '<div class="empty-state">ยังไม่มี Stock Lot ที่เปิดใช้งานในกล่องนี้</div>';
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <h6 class="fw-bold mb-3">เทียบกับรายการมาตรฐาน</h6>
+            ${expectedHtml}
+          </div>
+          <div class="col-lg-6">
+            <h6 class="fw-bold mb-3">Stock Lot ในกล่อง</h6>
+            ${lotHtml}
+          </div>
+        </div>
+      `;
+
+      new bootstrap.Modal(document.getElementById('boxDetailModal')).show();
+    }
+
+    function renderMedicineCheckRow(item) {
+      let status = '<span class="status-pill status-ready">พร้อม</span>';
+      if (item.totalQty <= 0) {
+        status = '<span class="status-pill status-risk">ขาด</span>';
+      } else if (item.totalQty < item.minQty) {
+        status = '<span class="status-pill status-watch">ต่ำกว่าขั้นต่ำ</span>';
+      }
+
+      const nearest = item.nearestLot ? `Lot ใกล้สุด: ${escapeHtml(item.nearestLot.lot_no || '-')} (${formatThaiDate(item.nearestLot.exp_date)})` : 'ยังไม่มี lot';
+
+      return `
+        <div class="medicine-row">
+          <div class="d-flex justify-content-between gap-2">
+            <div>
+              <div class="fw-bold">${escapeHtml(item.medicineName)}</div>
+              <div class="text-muted small">${nearest}</div>
+            </div>
+            <div>${status}</div>
+          </div>
+          <div class="small mt-2">
+            คงเหลือ ${escapeHtml(item.totalQty)} ${escapeHtml(item.unit)} | ขั้นต่ำ ${escapeHtml(item.minQty)} | มาตรฐาน ${escapeHtml(item.standardQty)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLotRow(lot) {
+      const days = daysLeft(lot.exp_date);
+      let status = '<span class="status-pill status-ready">ปกติ</span>';
+      if (days < 0) {
+        status = '<span class="status-pill status-risk">หมดอายุแล้ว</span>';
+      } else if (days <= 90) {
+        status = `<span class="status-pill status-watch">เหลือ ${days} วัน</span>`;
+      }
+
+      return `
+        <div class="medicine-row">
+          <div class="d-flex justify-content-between gap-2">
+            <div>
+              <div class="fw-bold">${escapeHtml(getMedicineName(lot.medicine_id))}</div>
+              <div class="text-muted small">Lot: ${escapeHtml(lot.lot_no || '-')} | หมดอายุ ${formatThaiDate(lot.exp_date)}</div>
+            </div>
+            <div>${status}</div>
+          </div>
+          <div class="small mt-2">คงเหลือ ${escapeHtml(lot.current_qty || 0)} ${escapeHtml(lot.unit || getMedicineUnit(lot.medicine_id))}</div>
+        </div>
+      `;
+    }
+
+    function getStatusText(status) {
+      if (status === 'ready') return 'พร้อมใช้งาน';
+      if (status === 'watch') return 'ต้องติดตาม';
+      return 'ต้องแก้ก่อนใช้';
+    }
+
+    function getStatusClass(status) {
+      if (status === 'ready') return 'status-ready';
+      if (status === 'watch') return 'status-watch';
+      return 'status-risk';
+    }
+
+    function getMedicineName(id) {
+      const med = medicines.find(item => sameId(item.medicine_id, id));
+      if (!med) return id || '-';
+      return `${med.medicine_name || ''} ${med.strength || ''}`.trim();
+    }
+
+    function getMedicineUnit(id) {
+      const med = medicines.find(item => sameId(item.medicine_id, id));
+      return med ? med.unit || '' : '';
+    }
+
+    function getDepartmentName(id) {
+      const department = departments.find(item => sameId(item.department_id, id));
+      return department ? department.department_name : id || '-';
+    }
+
+    function sameId(a, b) {
+      return String(a ?? '') === String(b ?? '');
+    }
+
+    function daysLeft(value) {
+      if (!value) return 9999;
+      const today = new Date();
+      const exp = new Date(value);
+      if (isNaN(exp.getTime())) return 9999;
+      today.setHours(0, 0, 0, 0);
+      exp.setHours(0, 0, 0, 0);
+      return Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function formatThaiDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+      return date.toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function setLastUpdated() {
+      document.getElementById('lastUpdatedText').innerText = 'อัปเดตล่าสุด ' + new Date().toLocaleString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function escapeHtml(text) {
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeAttr(text) {
+      return escapeHtml(text).replaceAll('`', '&#096;');
+    }
+  </script>
+
+</body>
+
+</html>

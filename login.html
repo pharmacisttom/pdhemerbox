@@ -56,6 +56,15 @@
             font-size: 0.9rem;
             color: #6c757d;
         }
+        
+        .privacy-note {
+            background: #f8fafc;
+            border: 1px solid #dbe4ef;
+            border-radius: 16px;
+            color: #475569;
+            font-size: .92rem;
+            padding: 12px 14px;
+        }
     </style>
 </head>
 
@@ -73,6 +82,11 @@
                 </div>
 
                 <form id="loginForm" autocomplete="off">
+
+                    <div class="privacy-note mb-3">
+                        ระบบมีการจัดเก็บข้อมูลการเข้าสู่ระบบไว้ในอุปกรณ์ของท่านเพื่อความปลอดภัยและการตรวจสอบย้อนหลัง
+                        <button type="button" class="btn btn-link p-0 align-baseline" onclick="showPrivacyNotice()">อ่านประกาศ PDPA/คุกกี้</button>
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Username</label>
@@ -114,7 +128,11 @@
             const token = localStorage.getItem(TOKEN_KEY);
             const user = localStorage.getItem(USER_KEY);
 
-            if (token && user) {
+            ensurePrivacyConsent({
+                redirectOnReject: true
+            });
+
+            if (token && user && hasPrivacyConsent()) {
                 window.location.href = 'dashboard.html';
             }
         });
@@ -125,6 +143,14 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const btnLogin = document.getElementById('btnLogin');
+
+            const accepted = await ensurePrivacyConsent({
+                redirectOnReject: true
+            });
+
+            if (!accepted) {
+                return;
+            }
 
             if (!username || !password) {
                 Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอก Username และ Password', 'warning');

@@ -91,7 +91,9 @@
 
                         <div class="col-md-6">
                             <label class="form-label">รหัสกล่องยา</label>
-                            <input type="text" id="box_code" class="form-control" placeholder="เช่น ER-BOX-01" required>
+                            <select id="box_code" class="form-select" required>
+              <option value="">-- เลือกกล่องยาตามหน่วยงาน --</option>
+            </select>
                         </div>
 
                         <div class="col-md-6">
@@ -193,6 +195,9 @@
 
         let medicines = [];
         let departments = [];
+        let boxTypes = [];
+        let boxItems = [];
+        let departmentBoxes = [];
         let requestItems = [];
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -222,7 +227,20 @@
                 medicines = result.medicines || [];
                 departments = result.departments || [];
 
+                const setupRes = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(getToken()));
+                const setupResult = await setupRes.json();
+
+                if (!setupResult.success) {
+                    Swal.fire('ผิดพลาด', setupResult.message, 'error');
+                    return;
+                }
+
+                boxTypes = setupResult.box_types || [];
+                boxItems = setupResult.box_items || [];
+                departmentBoxes = setupResult.department_boxes || [];
+
                 renderDepartments();
+                renderBoxes();
                 renderMedicines();
 
             } catch (error) {
@@ -237,7 +255,9 @@
 
             if (!boxFromQr) return;
 
-            document.getElementById('box_code').value = boxFromQr;
+            applyDepartmentFromBox(boxFromQr);
+            renderBoxes(boxFromQr);
+            renderMedicines();
             document.getElementById('qrBoxText').innerText = boxFromQr;
             document.getElementById('qrAlert').style.display = 'block';
         }
@@ -266,11 +286,56 @@
             }
         }
 
+        document.getElementById('department_id').addEventListener('change', function() {
+            requestItems = [];
+            renderBoxes();
+            renderMedicines();
+            renderItems();
+        });
+
+        document.getElementById('box_code').addEventListener('change', function() {
+            requestItems = [];
+            renderMedicines();
+            renderItems();
+        });
+
+        function renderBoxes(selectedValue = '') {
+            const select = document.getElementById('box_code');
+            const departmentId = document.getElementById('department_id').value;
+            const currentValue = selectedValue || select.value;
+
+            select.innerHTML = '<option value="">-- เลือกกล่องยาตามหน่วยงาน --</option>';
+
+            departmentBoxes
+                .filter(box => box.status === 'active')
+                .filter(box => !departmentId || sameId(box.department_id, departmentId))
+                .forEach(box => {
+                    select.innerHTML += `
+      <option value="${escapeHtml(box.box_code)}">
+        ${escapeHtml(box.box_code)} - ${escapeHtml(box.box_name || getBoxTypeName(box.box_type_id) || 'กล่องยา')}
+      </option>
+    `;
+                });
+
+            if (currentValue && Array.from(select.options).some(option => option.value === currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
         function renderMedicines() {
             const select = document.getElementById('medicine_id');
             select.innerHTML = '<option value="">-- เลือกรายการยา --</option>';
 
-            medicines.forEach(m => {
+            const selectedBox = getSelectedBox();
+            const allowedMedicineIds = selectedBox ?
+                boxItems
+                .filter(item => item.status === 'active' && sameId(item.box_type_id, selectedBox.box_type_id))
+                .map(item => String(item.medicine_id)) :
+                [];
+
+            medicines
+                .filter(m => !selectedBox || allowedMedicineIds.includes(String(m.medicine_id)))
+                .forEach(m => {
                 const medText = `${m.medicine_name || ''} ${m.strength || ''}`;
                 select.innerHTML += `
       <option value="${escapeHtml(m.medicine_id)}" data-unit="${escapeHtml(m.unit)}">
@@ -394,7 +459,7 @@
                     token: getToken(),
                     user: user,
                     department_id: document.getElementById('department_id').value,
-                    box_code: document.getElementById('box_code').value.trim(),
+                    box_code: document.getElementById('box_code').value,
                     phone: document.getElementById('phone').value.trim(),
                     usage_datetime: document.getElementById('usage_datetime').value,
                     reason: document.getElementById('reason').value.trim(),
@@ -456,6 +521,27 @@
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
+        }
+
+        function getSelectedBox() {
+            const boxCode = document.getElementById('box_code').value;
+            return departmentBoxes.find(box => sameId(box.box_code, boxCode)) || null;
+        }
+
+        function getBoxTypeName(boxTypeId) {
+            const boxType = boxTypes.find(item => sameId(item.box_type_id, boxTypeId));
+            return boxType ? boxType.box_name : '';
+        }
+
+        function applyDepartmentFromBox(boxCode) {
+            const box = departmentBoxes.find(item => sameId(item.box_code, boxCode));
+            if (box) {
+                document.getElementById('department_id').value = box.department_id || '';
+            }
+        }
+
+        function sameId(a, b) {
+            return String(a ?? '') === String(b ?? '');
         }
 
         function escapeHtml(text) {

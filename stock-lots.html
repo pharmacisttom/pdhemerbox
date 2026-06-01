@@ -90,7 +90,9 @@
 
           <div class="col-md-3">
             <label class="form-label">รหัสกล่องยา</label>
-            <input type="text" id="box_code" class="form-control" placeholder="เช่น ER-BOX-001">
+            <select id="box_code" class="form-select" required>
+              <option value="">-- เลือกกล่องยาตามหน่วยงาน --</option>
+            </select>
           </div>
 
           <div class="col-md-3">
@@ -166,6 +168,8 @@ requireRole(['admin', 'box_manager', 'box_dispenser']);
 const user = getUser();
 let medicines = [];
 let departments = [];
+let departmentBoxes = [];
+let boxItems = [];
 let lots = [];
 let dataTable = null;
 
@@ -189,6 +193,17 @@ async function loadLots() {
     departments = result.departments || [];
     lots = result.lots || [];
 
+    const setupRes = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(getToken()));
+    const setupResult = await setupRes.json();
+
+    if (!setupResult.success) {
+      Swal.fire('ผิดพลาด', setupResult.message, 'error');
+      return;
+    }
+
+    departmentBoxes = setupResult.department_boxes || [];
+    boxItems = setupResult.box_items || [];
+
     renderSelects();
     renderTable();
 
@@ -199,18 +214,7 @@ async function loadLots() {
 }
 
 function renderSelects() {
-  const medSelect = document.getElementById('medicine_id');
-  medSelect.innerHTML = '<option value="">-- เลือกรายการยา --</option>';
-
-  medicines
-    .filter(m => m.status === 'active')
-    .forEach(m => {
-      medSelect.innerHTML += `
-        <option value="${escapeHtml(m.medicine_id)}" data-unit="${escapeHtml(m.unit)}">
-          ${escapeHtml(m.medicine_name)} ${escapeHtml(m.strength)}
-        </option>
-      `;
-    });
+  renderMedicineSelect();
 
   const locSelect = document.getElementById('location');
   locSelect.innerHTML = '<option value="">-- เลือกหน่วยงาน --</option>';
@@ -219,11 +223,75 @@ function renderSelects() {
     .filter(d => d.status === 'active')
     .forEach(d => {
       locSelect.innerHTML += `
-        <option value="${escapeHtml(d.department_name)}">
+        <option value="${escapeHtml(d.department_name)}" data-department-id="${escapeHtml(d.department_id)}">
           ${escapeHtml(d.department_name)}
         </option>
       `;
     });
+
+  renderBoxSelect();
+}
+
+document.getElementById('location').addEventListener('change', function() {
+  renderBoxSelect();
+  renderMedicineSelect();
+});
+
+function renderBoxSelect(selectedValue = '') {
+  const select = document.getElementById('box_code');
+  const currentValue = selectedValue || select.value;
+  const departmentId = getSelectedDepartmentId();
+
+  select.innerHTML = '<option value="">-- เลือกกล่องยาตามหน่วยงาน --</option>';
+
+  departmentBoxes
+    .filter(box => box.status === 'active')
+    .filter(box => !departmentId || sameId(box.department_id, departmentId))
+    .forEach(box => {
+      select.innerHTML += `
+        <option value="${escapeHtml(box.box_code)}">
+          ${escapeHtml(box.box_code)} - ${escapeHtml(box.box_name || 'กล่องยา')}
+        </option>
+      `;
+    });
+
+  if (currentValue && Array.from(select.options).some(option => option.value === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+document.getElementById('box_code').addEventListener('change', function() {
+  renderMedicineSelect();
+});
+
+function renderMedicineSelect(selectedValue = '') {
+  const medSelect = document.getElementById('medicine_id');
+  const currentValue = selectedValue || medSelect.value;
+  const selectedBox = getSelectedBox();
+  const allowedMedicineIds = selectedBox ?
+    boxItems
+      .filter(item => item.status === 'active' && sameId(item.box_type_id, selectedBox.box_type_id))
+      .map(item => String(item.medicine_id)) :
+    [];
+
+  medSelect.innerHTML = '<option value="">-- เลือกรายการยา --</option>';
+
+  medicines
+    .filter(m => m.status === 'active')
+    .filter(m => !selectedBox || allowedMedicineIds.includes(String(m.medicine_id)))
+    .forEach(m => {
+      medSelect.innerHTML += `
+        <option value="${escapeHtml(m.medicine_id)}" data-unit="${escapeHtml(m.unit)}">
+          ${escapeHtml(m.medicine_name)} ${escapeHtml(m.strength)}
+        </option>
+      `;
+    });
+
+  if (currentValue && Array.from(medSelect.options).some(option => option.value === currentValue)) {
+    medSelect.value = currentValue;
+  } else {
+    document.getElementById('unit').value = '';
+  }
 }
 
 document.getElementById('medicine_id').addEventListener('change', function() {
@@ -254,7 +322,7 @@ document.getElementById('lotForm').addEventListener('submit', async function(e) 
     current_qty: document.getElementById('current_qty').value,
     unit: document.getElementById('unit').value,
     location: document.getElementById('location').value,
-    box_code: document.getElementById('box_code').value.trim(),
+    box_code: document.getElementById('box_code').value,
     status: document.getElementById('status').value,
     note: document.getElementById('note').value.trim()
   };
@@ -328,7 +396,8 @@ function editLot(lotId) {
   document.getElementById('current_qty').value = l.current_qty || 0;
   document.getElementById('unit').value = l.unit || '';
   document.getElementById('location').value = l.location || '';
-  document.getElementById('box_code').value = l.box_code || '';
+  renderBoxSelect(l.box_code || '');
+  renderMedicineSelect(l.medicine_id || '');
   document.getElementById('status').value = l.status || 'active';
   document.getElementById('note').value = l.note || '';
 
@@ -377,11 +446,32 @@ function resetForm() {
   document.getElementById('lot_id').value = '';
   document.getElementById('unit').value = '';
   document.getElementById('status').value = 'active';
+  renderBoxSelect();
 }
 
 function getMedicineName(id) {
   const m = medicines.find(x => x.medicine_id === id);
   return m ? `${m.medicine_name} ${m.strength}` : id;
+}
+
+function getSelectedDepartmentId() {
+  const select = document.getElementById('location');
+  const selectedOption = select.options[select.selectedIndex];
+  if (selectedOption && selectedOption.dataset.departmentId) {
+    return selectedOption.dataset.departmentId;
+  }
+
+  const department = departments.find(d => d.department_name === select.value || sameId(d.department_id, select.value));
+  return department ? department.department_id : '';
+}
+
+function getSelectedBox() {
+  const boxCode = document.getElementById('box_code').value;
+  return departmentBoxes.find(box => sameId(box.box_code, boxCode)) || null;
+}
+
+function sameId(a, b) {
+  return String(a ?? '') === String(b ?? '');
 }
 
 function qtyBadge(qty) {

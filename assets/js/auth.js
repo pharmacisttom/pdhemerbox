@@ -33,6 +33,79 @@ function clearSession() {
   localStorage.removeItem('medbox_last_activity');
 }
 
+function hasPrivacyConsent() {
+  try {
+    const consent = JSON.parse(localStorage.getItem(PRIVACY_CONSENT_KEY));
+    return Boolean(consent && consent.accepted === true && consent.version === 1);
+  } catch (e) {
+    return false;
+  }
+}
+
+function setPrivacyConsent() {
+  localStorage.setItem(
+    PRIVACY_CONSENT_KEY,
+    JSON.stringify({
+      accepted: true,
+      version: 1,
+      accepted_at: new Date().toISOString()
+    })
+  );
+}
+
+function clearPrivacyConsent() {
+  localStorage.removeItem(PRIVACY_CONSENT_KEY);
+  clearSession();
+}
+
+async function showPrivacyNotice(options = {}) {
+  const result = await Swal.fire({
+    icon: 'info',
+    title: 'ประกาศการใช้ข้อมูลส่วนบุคคลและคุกกี้',
+    html: `
+      <div style="text-align:left">
+        <p><b>Emergency MedBox</b> ใช้ข้อมูลส่วนบุคคลเท่าที่จำเป็นเพื่อยืนยันตัวตน กำหนดสิทธิ์ บันทึกการเบิก/ใช้ยา ตรวจสอบย้อนหลัง และรักษาความปลอดภัยของระบบ</p>
+        <p><b>ข้อมูลที่เกี่ยวข้อง:</b> ชื่อผู้ใช้ ชื่อ-สกุล หน่วยงาน บทบาทการใช้งาน ประวัติการทำรายการ รหัสกล่องยา รายการยา รูปภาพที่แนบ และข้อมูลวันเวลาใช้งาน</p>
+        <p><b>คุกกี้/ข้อมูลบนอุปกรณ์:</b> ระบบนี้ไม่ใช้คุกกี้เพื่อโฆษณาหรือการตลาด แต่ใช้ <code>localStorage</code> เพื่อเก็บ token การเข้าสู่ระบบ ข้อมูลผู้ใช้ เวลากิจกรรมล่าสุด และสถานะการยอมรับประกาศนี้</p>
+        <p><b>การส่งข้อมูล:</b> ข้อมูลถูกส่งไปยัง API/Google Apps Script ที่ระบบกำหนด เพื่อประมวลผลตามวัตถุประสงค์ของงานกล่องยาฉุกเฉิน</p>
+        <p><b>สิทธิของผู้ใช้:</b> สามารถติดต่อผู้ดูแลระบบเพื่อขอเข้าถึง แก้ไข ตรวจสอบ หรือขอจัดการข้อมูลตามนโยบายของหน่วยงานและกฎหมายคุ้มครองข้อมูลส่วนบุคคล</p>
+        <p class="mb-0 text-muted">การกด “ยอมรับและใช้งานระบบ” หมายถึงท่านรับทราบประกาศนี้และยินยอมให้ระบบจัดเก็บข้อมูลที่จำเป็นต่อการใช้งาน</p>
+      </div>
+    `,
+    width: 760,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showCancelButton: true,
+    confirmButtonText: 'ยอมรับและใช้งานระบบ',
+    cancelButtonText: 'ไม่ยอมรับ',
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
+    setPrivacyConsent();
+    return true;
+  }
+
+  if (options.redirectOnReject) {
+    clearPrivacyConsent();
+    Swal.fire({
+      icon: 'warning',
+      title: 'ยังไม่สามารถใช้งานระบบได้',
+      text: 'กรุณายอมรับประกาศการใช้ข้อมูลส่วนบุคคลและคุกกี้ก่อนใช้งานระบบ'
+    });
+  }
+
+  return false;
+}
+
+async function ensurePrivacyConsent(options = {}) {
+  if (hasPrivacyConsent()) {
+    return true;
+  }
+
+  return showPrivacyNotice(options);
+}
+
 function isLoggedIn() {
   const token = getToken();
   const user = getUser();
@@ -60,6 +133,16 @@ function isLoggedIn() {
 }
 
 function requireLogin() {
+  if (!hasPrivacyConsent()) {
+    clearSession();
+
+    if (!window.location.pathname.includes('login.html')) {
+      window.location.href = 'login.html';
+    }
+
+    return false;
+  }
+
   if (!isLoggedIn()) {
 
     clearSession();

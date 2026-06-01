@@ -5,6 +5,7 @@ const HOSPITAL_NAME = 'ห้องยา โรงพยาบาลปลว�
 
 const TOKEN_KEY = 'medbox_token';
 const USER_KEY = 'medbox_user';
+const PRIVACY_CONSENT_KEY = 'medbox_privacy_consent_v1';
 
 const SESSION_TIMEOUT_MINUTES = 480;
 

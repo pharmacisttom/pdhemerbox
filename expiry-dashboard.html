@@ -1,203 +1,166 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
-  <title>ภาพรวมวันหมดอายุ | Emergency MedBox</title>
+  <title>ระบบงานคุณภาพวันหมดอายุ | Emergency MedBox</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <link rel="icon" type="image/x-icon" href="img/pdh.ico">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    * { box-sizing: border-box; }
-
     body {
-      font-family: 'Sarabun', sans-serif;
       background: #f3f5f7;
-      color: #1f2937;
+      color: #172033;
+      font-family: 'Sarabun', sans-serif;
     }
 
-    .hero {
-      background: linear-gradient(135deg, #047857, #34d399);
-      color: white;
-      padding: 34px 28px;
-      box-shadow: 0 8px 25px rgba(0,0,0,.12);
+    .topbar {
+      background: linear-gradient(135deg, #0d6efd, #198754);
+      color: #fff;
+      padding: 26px;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .12);
     }
 
-    .app-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 38px;
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: #fff;
+      padding: 6px;
+      object-fit: contain;
     }
 
-    .date-pill {
-      background: rgba(255,255,255,.16);
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: 999px;
-      padding: 12px 22px;
+    .panel,
+    .metric-card,
+    .quality-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+
+    .metric-card {
+      min-height: 150px;
+      padding: 18px;
+    }
+
+    .metric-label {
+      color: #64748b;
       font-weight: 700;
     }
 
-    .section-title {
-      font-weight: 800;
-      color: #111827;
-      margin: 32px 0 20px;
-    }
-
-    .summary-card {
-      border: none;
-      border-radius: 20px;
-      padding: 24px;
-      color: white;
-      min-height: 170px;
-      box-shadow: 0 12px 28px rgba(0,0,0,.14);
-    }
-
-    .card-red { background: linear-gradient(135deg, #dc2626, #991b1b); }
-    .card-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
-    .card-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
-    .card-green { background: linear-gradient(135deg, #059669, #065f46); }
-
-    .summary-days {
-      font-size: 2.2rem;
-      font-weight: 800;
-    }
-
-    .summary-count {
+    .metric-value {
       font-size: 2rem;
       font-weight: 800;
+      line-height: 1;
+      margin-top: 12px;
     }
 
-    .panel {
-      background: white;
-      border-radius: 22px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.08);
-      overflow: hidden;
+    .metric-note {
+      color: #64748b;
+      font-size: .92rem;
+      margin-top: 10px;
     }
 
     .panel-head {
-      padding: 24px;
-      border-bottom: 1px solid #eef0f3;
-      background: #fff7f7;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 18px 20px;
     }
 
-    .near-row {
-      padding: 18px 24px;
-      border-bottom: 1px solid #eef0f3;
+    .panel-body {
+      padding: 20px;
     }
 
-    .near-row:last-child {
-      border-bottom: none;
+    .form-control,
+    .form-select,
+    .btn-main {
+      border-radius: 8px;
+      min-height: 42px;
     }
 
-    .tag {
-      display: inline-block;
-      border-radius: 10px;
-      padding: 6px 12px;
-      font-size: .9rem;
+    .btn-main {
       font-weight: 700;
     }
 
-    .tag-green {
-      background: #d1fae5;
-      color: #047857;
+    .tag {
+      border-radius: 999px;
+      display: inline-flex;
+      font-weight: 800;
+      padding: 6px 11px;
+      white-space: nowrap;
     }
 
-    .tag-red {
+    .tag-critical {
       background: #fee2e2;
-      color: #b91c1c;
+      color: #991b1b;
     }
 
-    .tag-gray {
-      background: #f3f4f6;
-      color: #374151;
+    .tag-warning {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .box-card {
-      border: none;
-      border-radius: 22px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    .tag-watch {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .tag-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .table thead th {
+      background: #eef6ff;
+      color: #1e3a8a;
+      white-space: nowrap;
+    }
+
+    .bar {
+      background: #e2e8f0;
+      border-radius: 999px;
+      height: 10px;
       overflow: hidden;
+    }
+
+    .bar-fill {
       height: 100%;
-      cursor: pointer;
-      transition: .2s;
+      min-width: 3px;
     }
 
-    .box-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .box-head {
-      padding: 20px;
-      border-bottom: 1px solid #eef0f3;
-    }
-
-    .box-count {
-      background: #d1fae5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-      border-radius: 12px;
-      padding: 8px 14px;
-      font-weight: 800;
-    }
-
-    .safe-box {
-      border: 1px solid #bbf7d0;
-      border-radius: 18px;
-      min-height: 150px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f0fdf4;
-      color: #047857;
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .risk-item {
-      border-left: 5px solid #ef4444;
+    .risk-line {
+      border-left: 5px solid #dc2626;
+      border-radius: 8px;
+      padding: 12px 14px;
       background: #fff7f7;
-      border-radius: 14px;
+    }
+
+    .evidence-box {
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
       padding: 14px;
     }
 
-    .modal-content {
-      border-radius: 24px;
-      overflow: hidden;
-      border: none;
-    }
-
-    .modal-header-custom {
-      background: #047857;
-      color: white;
-      padding: 24px;
-    }
-
-    @media (max-width: 768px) {
-      .hero {
-        text-align: center;
+    @media print {
+      .no-print {
+        display: none !important;
       }
 
-      .app-icon {
-        margin: 0 auto 12px;
+      body {
+        background: #fff;
       }
 
-      .summary-card {
-        min-height: 150px;
-      }
-
-      .summary-days {
-        font-size: 1.8rem;
-      }
-
-      .summary-count {
-        font-size: 1.7rem;
+      .topbar,
+      .panel,
+      .metric-card,
+      .quality-card {
+        box-shadow: none;
       }
     }
   </style>
@@ -205,410 +168,612 @@
 
 <body>
 
-<header class="hero">
-  <div class="container">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-      <div class="d-flex flex-column flex-md-row align-items-center gap-3">
-        <div class="app-icon">💊</div>
+  <header class="topbar mb-4">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+        <img src="img/pdh.ico" class="logo" alt="PDH Logo">
         <div>
-          <h1 class="fw-bold mb-1">ระบบบริหารกล่องยา</h1>
-          <div class="fs-5">กลุ่มงานเภสัชกรรมฯโรงพยาบาลปลวกแดง</div>
+          <h3 class="fw-bold mb-1">ระบบงานคุณภาพวันหมดอายุยา</h3>
+          <div>ควบคุมความเสี่ยงยาใกล้หมดอายุ สนับสนุนหลักฐานงานคุณภาพและ HA</div>
         </div>
       </div>
 
-      <div class="d-flex gap-2 align-items-center">
-        <div class="date-pill" id="todayText">-</div>
-        <a href="dashboard.html" class="btn btn-light rounded-pill fw-bold">หน้าหลัก</a>
+      <div class="d-flex flex-wrap gap-2 no-print">
+        <button class="btn btn-light btn-main" onclick="window.print()">พิมพ์รายงาน</button>
+        <button class="btn btn-outline-light btn-main" onclick="exportCsv()">Export CSV</button>
+        <a href="stock-lots.html" class="btn btn-outline-light btn-main">จัดการ Stock Lot</a>
+        <a href="dashboard.html" class="btn btn-outline-light btn-main">หน้าหลัก</a>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main class="container pb-5">
+  <main class="container pb-5">
 
-  <h3 class="section-title">📊 ภาพรวมวันหมดอายุ</h3>
-
-  <div class="row g-4">
-    <div class="col-md-3">
-      <div class="summary-card card-red">
-        <div class="fw-bold">หมดอายุภายใน</div>
-        <div class="summary-days">30 วัน</div>
-        <hr>
-        <div><span class="summary-count" id="count30">0</span> รายการ</div>
+    <section class="panel mb-4 no-print">
+      <div class="panel-head">
+        <h5 class="fw-bold mb-1">ตัวกรองรายงานคุณภาพ</h5>
+        <div class="text-muted">ใช้สำหรับประชุมทบทวนความเสี่ยง ประเมินความครอบคลุม และติดตามรายการที่ต้องดำเนินการ</div>
       </div>
-    </div>
+      <div class="panel-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label">หน่วยงาน</label>
+            <select id="departmentFilter" class="form-select" onchange="renderAll()">
+              <option value="">ทุกหน่วยงาน</option>
+            </select>
+          </div>
 
-    <div class="col-md-3">
-      <div class="summary-card card-orange">
-        <div class="fw-bold">หมดอายุภายใน</div>
-        <div class="summary-days">60 วัน</div>
-        <hr>
-        <div><span class="summary-count" id="count60">0</span> รายการ</div>
-      </div>
-    </div>
+          <div class="col-md-3">
+            <label class="form-label">ระดับความเสี่ยง</label>
+            <select id="riskFilter" class="form-select" onchange="renderAll()">
+              <option value="">ทุกระดับ</option>
+              <option value="expired">หมดอายุแล้ว</option>
+              <option value="critical">0-30 วัน</option>
+              <option value="warning">31-60 วัน</option>
+              <option value="watch">61-90 วัน</option>
+              <option value="safe">มากกว่า 90 วัน</option>
+            </select>
+          </div>
 
-    <div class="col-md-3">
-      <div class="summary-card card-yellow">
-        <div class="fw-bold">หมดอายุภายใน</div>
-        <div class="summary-days">90 วัน</div>
-        <hr>
-        <div><span class="summary-count" id="count90">0</span> รายการ</div>
-      </div>
-    </div>
+          <div class="col-md-3">
+            <label class="form-label">กล่องยา</label>
+            <input type="search" id="boxSearch" class="form-control" placeholder="ค้นหารหัสกล่อง" oninput="renderAll()">
+          </div>
 
-    <div class="col-md-3">
-      <div class="summary-card card-green">
-        <div class="fw-bold">อายุมากกว่า</div>
-        <div class="summary-days">90 วัน</div>
-        <hr>
-        <div><span class="summary-count" id="countSafe">0</span> รายการ</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel mt-5">
-    <div class="panel-head">
-      <h4 class="fw-bold mb-1 text-danger">🚨 รายการยาใกล้หมดอายุ</h4>
-      <div class="text-muted">เรียงลำดับตามวันที่หมดอายุ</div>
-    </div>
-
-    <div id="nearExpiryList">
-      <div class="p-4 text-center text-muted">กำลังโหลดข้อมูล...</div>
-    </div>
-  </div>
-
-  <h3 class="section-title">📦 กล่องยาทั้งหมด</h3>
-
-  <div id="boxGrid" class="row g-4">
-    <div class="col-12 text-center text-muted">กำลังโหลดข้อมูล...</div>
-  </div>
-
-</main>
-
-<div class="modal fade" id="boxModal" tabindex="-1">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header-custom d-flex justify-content-between align-items-center">
-        <div>
-          <h3 class="fw-bold mb-1" id="modalBoxTitle">-</h3>
-          <div id="modalBoxSub">รายการกล่องยา เรียงตามวันหมดอายุ</div>
+          <div class="col-md-3">
+            <button class="btn btn-primary btn-main w-100" onclick="loadData()">รีเฟรชข้อมูล</button>
+          </div>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="metric-card">
+          <div class="metric-label">ความครอบคลุมการบันทึก Expiry</div>
+          <div class="metric-value text-success" id="coverageRate">0%</div>
+          <div class="metric-note">เป้าหมายงานคุณภาพ: 100%</div>
+        </div>
       </div>
 
-      <div class="modal-body p-4">
-        <div id="modalBoxContent"></div>
+      <div class="col-md-3">
+        <div class="metric-card">
+          <div class="metric-label">หมดอายุแล้ว</div>
+          <div class="metric-value text-danger" id="expiredCount">0</div>
+          <div class="metric-note">ต้องแยกออก/ปิดใช้งานทันที</div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <div class="col-md-3">
+        <div class="metric-card">
+          <div class="metric-label">ต้องดำเนินการใน 30 วัน</div>
+          <div class="metric-value text-warning" id="criticalCount">0</div>
+          <div class="metric-note">เปลี่ยน lot หรือวางแผน rotate</div>
+        </div>
+      </div>
 
-<script src="assets/js/config.js?v=20"></script>
-<script src="assets/js/auth.js?v=20"></script>
+      <div class="col-md-3">
+        <div class="metric-card">
+          <div class="metric-label">ดัชนีความเสี่ยงรวม</div>
+          <div class="metric-value text-primary" id="riskIndex">0</div>
+          <div class="metric-note">คะแนนถ่วงน้ำหนักเพื่อจัดลำดับงาน</div>
+        </div>
+      </div>
+    </section>
 
-<script>
-requireLogin();
+    <section class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="panel h-100">
+          <div class="panel-head">
+            <h5 class="fw-bold mb-1">สรุปตามระดับความเสี่ยง</h5>
+            <div class="text-muted">ใช้กำหนด priority ของการดำเนินการประจำรอบ</div>
+          </div>
+          <div class="panel-body" id="riskSummary"></div>
+        </div>
+      </div>
 
-const user = getUser();
+      <div class="col-lg-7">
+        <div class="panel h-100">
+          <div class="panel-head">
+            <h5 class="fw-bold mb-1">แผนงานคุณภาพและ CAPA</h5>
+            <div class="text-muted">แนวทางดำเนินการที่ใช้แนบเป็นหลักฐานการติดตามคุณภาพ</div>
+          </div>
+          <div class="panel-body" id="qualityActions"></div>
+        </div>
+      </div>
+    </section>
 
-let lots = [];
-let medicines = [];
-let departments = [];
-let departmentBoxes = [];
+    <section class="panel mb-4">
+      <div class="panel-head d-flex flex-column flex-md-row justify-content-between gap-2">
+        <div>
+          <h5 class="fw-bold mb-1">Worklist รายการที่ต้องจัดการ</h5>
+          <div class="text-muted">เรียงตามวันคงเหลือและระดับความเสี่ยง เพื่อใช้ติดตามรอบตรวจประจำเดือน</div>
+        </div>
+        <div class="fw-bold text-muted" id="reportDate">-</div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ระดับ</th>
+                <th>หน่วยงาน/กล่อง</th>
+                <th>รายการยา</th>
+                <th>Lot</th>
+                <th>คงเหลือ</th>
+                <th>วันหมดอายุ</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="worklistBody">
+              <tr>
+                <td colspan="7" class="text-center text-muted">กำลังโหลดข้อมูล...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-document.addEventListener('DOMContentLoaded', function() {
-  setTodayText();
-  loadData();
-});
+    <section class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="panel h-100">
+          <div class="panel-head">
+            <h5 class="fw-bold mb-1">สถิติรายหน่วยงาน</h5>
+            <div class="text-muted">ช่วยระบุพื้นที่ที่ต้อง coaching หรือปรับรอบตรวจ</div>
+          </div>
+          <div class="panel-body" id="departmentStats"></div>
+        </div>
+      </div>
 
-function setTodayText() {
-  const now = new Date();
-  document.getElementById('todayText').innerText =
-    now.toLocaleDateString('th-TH', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+      <div class="col-lg-6">
+        <div class="panel h-100">
+          <div class="panel-head">
+            <h5 class="fw-bold mb-1">แนวโน้มหมดอายุ 6 เดือนข้างหน้า</h5>
+            <div class="text-muted">ใช้วางแผน rotate / reorder / เปลี่ยน lot ล่วงหน้า</div>
+          </div>
+          <div class="panel-body" id="monthlyTrend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h5 class="fw-bold mb-1">หลักฐานงานคุณภาพสำหรับทบทวน HA</h5>
+        <div class="text-muted">ระบบสรุปประเด็นที่ควรถูกบันทึกเป็น evidence ในการประชุม/round ตรวจ</div>
+      </div>
+      <div class="panel-body">
+        <div class="row g-3" id="evidenceGrid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/js/config.js?v=60"></script>
+  <script src="assets/js/auth.js?v=60"></script>
+
+  <script>
+    requireLogin();
+    requireRole(['admin', 'box_manager', 'box_dispenser']);
+
+    let lots = [];
+    let medicines = [];
+    let departments = [];
+    let departmentBoxes = [];
+    let qualityRows = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      setReportDate();
+      loadData();
     });
-}
 
-async function loadData() {
-  try {
-    const token = getToken();
+    async function loadData() {
+      try {
+        Swal.fire({
+          title: 'กำลังโหลดข้อมูลคุณภาพ',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
 
-    const lotRes = await fetch(API_URL + '?action=getStockLots&token=' + encodeURIComponent(token));
-    const lotResult = await lotRes.json();
+        const token = encodeURIComponent(getToken());
+        const lotRes = await fetch(API_URL + '?action=getStockLots&token=' + token);
+        const lotResult = await lotRes.json();
 
-    if (!lotResult.success) {
-      Swal.fire('โหลดข้อมูลไม่สำเร็จ', lotResult.message, 'error');
-      return;
+        if (!lotResult.success) {
+          throw new Error(lotResult.message || 'โหลดข้อมูล Stock Lot ไม่สำเร็จ');
+        }
+
+        const boxRes = await fetch(API_URL + '?action=getBoxSetupData&token=' + token);
+        const boxResult = await boxRes.json();
+
+        lots = lotResult.lots || [];
+        medicines = lotResult.medicines || [];
+        departments = mergeById(lotResult.departments || [], boxResult.departments || [], 'department_id');
+        departmentBoxes = boxResult.success ? boxResult.department_boxes || [] : [];
+
+        buildQualityRows();
+        renderDepartmentFilter();
+        renderAll();
+        Swal.close();
+      } catch (error) {
+        console.error(error);
+        Swal.fire('โหลดข้อมูลไม่สำเร็จ', error.message || 'กรุณาตรวจสอบ API', 'error');
+      }
     }
 
-    lots = lotResult.lots || [];
-    medicines = lotResult.medicines || [];
-    departments = lotResult.departments || [];
+    function buildQualityRows() {
+      qualityRows = lots
+        .filter(lot => lot.status === 'active')
+        .map(lot => {
+          const days = daysLeft(lot.exp_date);
+          const box = departmentBoxes.find(item => sameId(item.box_code, lot.box_code)) || {};
+          const departmentName = lot.location || getDepartmentName(box.department_id);
+          const risk = getRiskLevel(days, lot.exp_date);
 
-    const boxRes = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(token));
-    const boxResult = await boxRes.json();
-
-    if (boxResult.success) {
-      departmentBoxes = boxResult.department_boxes || [];
+          return {
+            ...lot,
+            days_left: days,
+            risk,
+            department_name: departmentName || '-',
+            medicine_name: getMedicineName(lot.medicine_id),
+            action: getActionText(risk)
+          };
+        });
     }
 
-    renderSummary();
-    renderNearExpiry();
-    renderBoxes();
+    function renderAll() {
+      const rows = getFilteredRows();
+      renderMetrics(rows);
+      renderRiskSummary(rows);
+      renderQualityActions(rows);
+      renderWorklist(rows);
+      renderDepartmentStats(rows);
+      renderMonthlyTrend(rows);
+      renderEvidence(rows);
+    }
 
-  } catch (error) {
-    console.error(error);
-    Swal.fire('เชื่อมต่อไม่ได้', 'กรุณาตรวจสอบ API หรือ Internet', 'error');
-  }
-}
+    function renderMetrics(rows) {
+      const activeLots = getFilteredRows(false);
+      const withExp = activeLots.filter(row => row.exp_date).length;
+      const coverage = activeLots.length ? Math.round((withExp / activeLots.length) * 100) : 100;
+      const expired = rows.filter(row => row.risk === 'expired').length;
+      const critical = rows.filter(row => row.risk === 'critical').length;
+      const riskIndex = rows.reduce((sum, row) => sum + getRiskScore(row.risk), 0);
 
-function renderSummary() {
-  const activeLots = lots.filter(l => l.status === 'active');
+      document.getElementById('coverageRate').innerText = coverage + '%';
+      document.getElementById('expiredCount').innerText = expired;
+      document.getElementById('criticalCount').innerText = critical;
+      document.getElementById('riskIndex').innerText = riskIndex;
+    }
 
-  const c30 = activeLots.filter(l => daysLeft(l.exp_date) <= 30).length;
-  const c60 = activeLots.filter(l => daysLeft(l.exp_date) > 30 && daysLeft(l.exp_date) <= 60).length;
-  const c90 = activeLots.filter(l => daysLeft(l.exp_date) > 60 && daysLeft(l.exp_date) <= 90).length;
-  const safe = activeLots.filter(l => daysLeft(l.exp_date) > 90).length;
+    function renderRiskSummary(rows) {
+      const groups = [
+        { key: 'expired', label: 'หมดอายุแล้ว', cls: 'tag-critical' },
+        { key: 'critical', label: '0-30 วัน', cls: 'tag-critical' },
+        { key: 'warning', label: '31-60 วัน', cls: 'tag-warning' },
+        { key: 'watch', label: '61-90 วัน', cls: 'tag-watch' },
+        { key: 'safe', label: 'มากกว่า 90 วัน', cls: 'tag-ok' }
+      ];
+      const max = Math.max(1, ...groups.map(group => rows.filter(row => row.risk === group.key).length));
 
-  document.getElementById('count30').innerText = c30;
-  document.getElementById('count60').innerText = c60;
-  document.getElementById('count90').innerText = c90;
-  document.getElementById('countSafe').innerText = safe;
-}
+      document.getElementById('riskSummary').innerHTML = groups.map(group => {
+        const count = rows.filter(row => row.risk === group.key).length;
+        const width = Math.round((count / max) * 100);
+        return `
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="tag ${group.cls}">${group.label}</span>
+              <span class="fw-bold">${count} lot</span>
+            </div>
+            <div class="bar"><div class="bar-fill ${barClass(group.key)}" style="width:${width}%"></div></div>
+          </div>
+        `;
+      }).join('');
+    }
 
-function renderNearExpiry() {
-  const container = document.getElementById('nearExpiryList');
+    function renderQualityActions(rows) {
+      const expired = rows.filter(row => row.risk === 'expired').length;
+      const critical = rows.filter(row => row.risk === 'critical').length;
+      const warning = rows.filter(row => row.risk === 'warning').length;
+      const noExp = rows.filter(row => !row.exp_date).length;
 
-  const near = lots
-    .filter(l => l.status === 'active')
-    .filter(l => daysLeft(l.exp_date) <= 90)
-    .sort((a, b) => daysLeft(a.exp_date) - daysLeft(b.exp_date));
-
-  if (near.length === 0) {
-    container.innerHTML = `
-      <div class="p-5 text-center text-success fw-bold">
-        ✅ ไม่พบรายการยาใกล้หมดอายุภายใน 90 วัน
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = '';
-
-  near.slice(0, 10).forEach(l => {
-    const d = daysLeft(l.exp_date);
-
-    container.innerHTML += `
-      <div class="near-row row align-items-center">
-        <div class="col-md-3 mb-2 mb-md-0">
-          <div class="fw-bold">${escapeHtml(l.location || getDepartmentFromBox(l.box_code))}</div>
-          <span class="tag tag-green">${escapeHtml(l.box_code || '-')}</span>
+      document.getElementById('qualityActions').innerHTML = `
+        <div class="row g-3">
+          ${qualityActionCard('P1', 'แยก/ปิดใช้งาน lot หมดอายุ', expired, 'ต้องดำเนินการทันทีและบันทึกหลักฐานการแยกยา')}
+          ${qualityActionCard('P2', 'เปลี่ยนหรือ rotate lot ภายใน 30 วัน', critical, 'มอบหมายผู้รับผิดชอบและกำหนดวันติดตาม')}
+          ${qualityActionCard('P3', 'วางแผนจัดการ 31-60 วัน', warning, 'เตรียมสำรองหรือกระจายใช้งานตามความเหมาะสม')}
+          ${qualityActionCard('DQ', 'แก้ข้อมูลวันหมดอายุไม่ครบ', noExp, 'ตรวจสอบเอกสารรับเข้าและบันทึก exp date ให้ครบ')}
         </div>
+      `;
+    }
 
-        <div class="col-md-4 mb-2 mb-md-0">
-          <div class="fw-bold">${escapeHtml(getMedicineNameLocal(l.medicine_id))}</div>
-          <div class="text-muted small">Lot: ${escapeHtml(l.lot_no)}</div>
-        </div>
-
-        <div class="col-md-2 mb-2 mb-md-0">
-          <span class="tag tag-gray">${escapeHtml(l.current_qty)} ${escapeHtml(l.unit)}</span>
-        </div>
-
-        <div class="col-md-3">
-          <div class="fw-bold">${formatThaiDate(l.exp_date)}</div>
-          <span class="tag tag-red">เหลืออีก ${d} วัน</span>
-        </div>
-      </div>
-    `;
-  });
-}
-
-function renderBoxes() {
-  const grid = document.getElementById('boxGrid');
-
-  if (departmentBoxes.length === 0) {
-    grid.innerHTML = `<div class="col-12 text-center text-muted">ยังไม่มีข้อมูลกล่องยา</div>`;
-    return;
-  }
-
-  grid.innerHTML = '';
-
-  departmentBoxes
-    .filter(b => b.status === 'active')
-    .forEach(box => {
-      const boxLots = lots.filter(l => l.box_code === box.box_code && l.status === 'active');
-      const riskLots = boxLots.filter(l => daysLeft(l.exp_date) <= 30);
-
-      grid.innerHTML += `
-        <div class="col-md-6 col-lg-4">
-          <div class="card box-card" onclick="openBoxDetail('${escapeAttr(box.box_code)}')">
-            <div class="box-head d-flex justify-content-between align-items-start">
+    function qualityActionCard(code, title, count, detail) {
+      return `
+        <div class="col-md-6">
+          <div class="quality-card p-3 h-100">
+            <div class="d-flex justify-content-between gap-2">
               <div>
-                <h5 class="fw-bold mb-1">📍 ${escapeHtml(box.box_name || box.box_code)}</h5>
-                <div class="text-muted">${escapeHtml(getDepartmentNameLocal(box.department_id))}</div>
+                <div class="fw-bold">${escapeHtml(code)}: ${escapeHtml(title)}</div>
+                <div class="text-muted small mt-1">${escapeHtml(detail)}</div>
               </div>
-              <div class="box-count">${boxLots.length}<br><small>รายการ</small></div>
-            </div>
-
-            <div class="card-body p-4">
-              ${
-                riskLots.length > 0
-                ? renderRiskPreview(riskLots)
-                : `<div class="safe-box">✅<br>ไม่มียาใกล้หมดอายุ<br>(ภายใน 30 วัน)</div>`
-              }
-            </div>
-
-            <div class="card-footer text-center text-muted bg-white">
-              คลิกเพื่อดูรายละเอียดในกล่อง
+              <span class="tag ${count > 0 ? 'tag-warning' : 'tag-ok'}">${count}</span>
             </div>
           </div>
         </div>
       `;
-    });
-}
+    }
 
-function renderRiskPreview(riskLots) {
-  let html = `
-    <div class="d-flex justify-content-between text-danger fw-bold mb-3">
-      <span>หมดอายุภายใน 30 วัน</span>
-      <span>${riskLots.length} รายการ</span>
-    </div>
-  `;
+    function renderWorklist(rows) {
+      const body = document.getElementById('worklistBody');
+      const workRows = rows
+        .filter(row => row.risk !== 'safe')
+        .sort((a, b) => a.days_left - b.days_left);
 
-  riskLots.slice(0, 2).forEach(l => {
-    html += `
-      <div class="risk-item mb-2">
-        <div class="fw-bold">${escapeHtml(getMedicineNameLocal(l.medicine_id))}</div>
-        <div>
-          <span class="tag tag-gray">${escapeHtml(l.current_qty)} ${escapeHtml(l.unit)}</span>
-          <span class="tag tag-red">อีก ${daysLeft(l.exp_date)} วัน</span>
-        </div>
-      </div>
-    `;
-  });
+      if (workRows.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" class="text-center text-success fw-bold">ไม่พบรายการเสี่ยงในเงื่อนไขที่เลือก</td></tr>';
+        return;
+      }
 
-  return html;
-}
-
-function openBoxDetail(boxCode) {
-  const box = departmentBoxes.find(b => b.box_code === boxCode) || {};
-  const boxLots = lots
-    .filter(l => l.box_code === boxCode && l.status === 'active')
-    .sort((a, b) => daysLeft(a.exp_date) - daysLeft(b.exp_date));
-
-  document.getElementById('modalBoxTitle').innerText = box.box_name || boxCode;
-  document.getElementById('modalBoxSub').innerText = 'รหัสกล่อง: ' + boxCode;
-
-  let html = '';
-
-  if (boxLots.length === 0) {
-    html = `<div class="text-center text-muted p-5">ไม่พบรายการยาในกล่องนี้</div>`;
-  } else {
-    html = `
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>รายการยา</th>
-              <th>Lot No.</th>
-              <th>จำนวน</th>
-              <th>วันหมดอายุ</th>
-              <th>สถานะ</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    boxLots.forEach(l => {
-      const d = daysLeft(l.exp_date);
-      html += `
+      body.innerHTML = workRows.map(row => `
         <tr>
-          <td class="fw-bold">${escapeHtml(getMedicineNameLocal(l.medicine_id))}</td>
-          <td>${escapeHtml(l.lot_no)}</td>
-          <td>${escapeHtml(l.current_qty)} ${escapeHtml(l.unit)}</td>
-          <td>${formatThaiDate(l.exp_date)}</td>
-          <td>${statusByDays(d)}</td>
+          <td>${riskBadge(row.risk, row.days_left)}</td>
+          <td>
+            <div class="fw-bold">${escapeHtml(row.department_name)}</div>
+            <div class="text-muted small">${escapeHtml(row.box_code || '-')}</div>
+          </td>
+          <td>${escapeHtml(row.medicine_name)}</td>
+          <td>${escapeHtml(row.lot_no || '-')}</td>
+          <td>${escapeHtml(row.current_qty || 0)} ${escapeHtml(row.unit || '')}</td>
+          <td>${formatThaiDate(row.exp_date)}</td>
+          <td>${escapeHtml(row.action)}</td>
         </tr>
-      `;
-    });
+      `).join('');
+    }
 
-    html += `
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
+    function renderDepartmentStats(rows) {
+      const map = new Map();
+      rows.forEach(row => {
+        const key = row.department_name || '-';
+        if (!map.has(key)) {
+          map.set(key, { total: 0, risk: 0, score: 0 });
+        }
+        const item = map.get(key);
+        item.total += 1;
+        item.risk += row.risk === 'safe' ? 0 : 1;
+        item.score += getRiskScore(row.risk);
+      });
 
-  document.getElementById('modalBoxContent').innerHTML = html;
+      const stats = Array.from(map.entries())
+        .map(([name, value]) => ({ name, ...value }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
 
-  const modal = new bootstrap.Modal(document.getElementById('boxModal'));
-  modal.show();
-}
+      if (stats.length === 0) {
+        document.getElementById('departmentStats').innerHTML = '<div class="text-muted">ไม่มีข้อมูล</div>';
+        return;
+      }
 
-function statusByDays(days) {
-  if (days < 0) return `<span class="tag tag-red">หมดอายุแล้ว</span>`;
-  if (days <= 30) return `<span class="tag tag-red">อีก ${days} วัน</span>`;
-  if (days <= 90) return `<span class="tag tag-gray">อีก ${days} วัน</span>`;
-  return `<span class="tag tag-green">อีก ${days} วัน</span>`;
-}
+      const max = Math.max(1, ...stats.map(item => item.score));
+      document.getElementById('departmentStats').innerHTML = stats.map(item => `
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <div class="fw-bold">${escapeHtml(item.name)}</div>
+            <div class="text-muted">${item.risk}/${item.total} lot เสี่ยง</div>
+          </div>
+          <div class="bar mt-2"><div class="bar-fill bg-danger" style="width:${Math.round((item.score / max) * 100)}%"></div></div>
+        </div>
+      `).join('');
+    }
 
-function daysLeft(dateValue) {
-  if (!dateValue) return 9999;
+    function renderMonthlyTrend(rows) {
+      const months = [];
+      const now = new Date();
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        months.push({
+          key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+          label: d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }),
+          count: 0
+        });
+      }
 
-  const today = new Date();
-  const exp = new Date(dateValue);
+      rows.forEach(row => {
+        const date = new Date(row.exp_date);
+        if (isNaN(date.getTime())) return;
+        const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        const month = months.find(item => item.key === key);
+        if (month) month.count += 1;
+      });
 
-  today.setHours(0,0,0,0);
-  exp.setHours(0,0,0,0);
+      const max = Math.max(1, ...months.map(item => item.count));
+      document.getElementById('monthlyTrend').innerHTML = months.map(item => `
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <div class="fw-bold">${escapeHtml(item.label)}</div>
+            <div>${item.count} lot</div>
+          </div>
+          <div class="bar mt-2"><div class="bar-fill bg-primary" style="width:${Math.round((item.count / max) * 100)}%"></div></div>
+        </div>
+      `).join('');
+    }
 
-  return Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-}
+    function renderEvidence(rows) {
+      const activeLots = getFilteredRows(false);
+      const latestDate = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+      const risky = rows.filter(row => row.risk !== 'safe').length;
+      const coverage = activeLots.length ? Math.round((activeLots.filter(row => row.exp_date).length / activeLots.length) * 100) : 100;
 
-function getMedicineNameLocal(id) {
-  const m = medicines.find(x => x.medicine_id === id);
-  return m ? `${m.medicine_name} ${m.strength}` : id;
-}
+      const evidence = [
+        ['ทะเบียนควบคุมวันหมดอายุ', `${activeLots.length} active lot, coverage ${coverage}%`],
+        ['รายการความเสี่ยงที่ต้องติดตาม', `${risky} lot ในเงื่อนไขที่เลือก`],
+        ['รอบทบทวนล่าสุด', latestDate],
+        ['แนวทางดำเนินการ', 'แยก lot หมดอายุ, rotate lot ใกล้หมดอายุ, แก้ข้อมูลไม่ครบ']
+      ];
 
-function getDepartmentNameLocal(id) {
-  const d = departments.find(x => x.department_id === id);
-  return d ? d.department_name : id;
-}
+      document.getElementById('evidenceGrid').innerHTML = evidence.map(item => `
+        <div class="col-md-6 col-lg-3">
+          <div class="evidence-box h-100">
+            <div class="fw-bold">${escapeHtml(item[0])}</div>
+            <div class="text-muted mt-2">${escapeHtml(item[1])}</div>
+          </div>
+        </div>
+      `).join('');
+    }
 
-function getDepartmentFromBox(boxCode) {
-  const b = departmentBoxes.find(x => x.box_code === boxCode);
-  return b ? getDepartmentNameLocal(b.department_id) : '-';
-}
+    function getFilteredRows(applyRisk = true) {
+      const department = document.getElementById('departmentFilter')?.value || '';
+      const risk = document.getElementById('riskFilter')?.value || '';
+      const boxSearch = (document.getElementById('boxSearch')?.value || '').trim().toLowerCase();
 
-function formatThaiDate(value) {
-  if (!value) return '-';
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return value;
+      return qualityRows.filter(row => {
+        if (department && row.department_name !== department) return false;
+        if (applyRisk && risk && row.risk !== risk) return false;
+        if (boxSearch && !String(row.box_code || '').toLowerCase().includes(boxSearch)) return false;
+        return true;
+      });
+    }
 
-  return d.toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-}
+    function renderDepartmentFilter() {
+      const select = document.getElementById('departmentFilter');
+      const currentValue = select.value;
+      const names = Array.from(new Set(qualityRows.map(row => row.department_name).filter(Boolean))).sort();
 
-function escapeHtml(text) {
-  if (text === null || text === undefined) return '';
-  return String(text)
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
-}
+      select.innerHTML = '<option value="">ทุกหน่วยงาน</option>' + names
+        .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+        .join('');
+      select.value = currentValue;
+    }
 
-function escapeAttr(text) {
-  return escapeHtml(text).replaceAll('`','&#096;');
-}
-</script>
+    function exportCsv() {
+      const rows = getFilteredRows();
+      const header = ['risk', 'department', 'box_code', 'medicine', 'lot_no', 'qty', 'unit', 'exp_date', 'days_left', 'action'];
+      const csvRows = [header.join(',')].concat(rows.map(row => [
+        row.risk,
+        row.department_name,
+        row.box_code || '',
+        row.medicine_name,
+        row.lot_no || '',
+        row.current_qty || 0,
+        row.unit || '',
+        row.exp_date || '',
+        row.days_left,
+        row.action
+      ].map(csvCell).join(',')));
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'expiry-quality-report.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? '').replaceAll('"', '""');
+      return `"${text}"`;
+    }
+
+    function riskBadge(risk, days) {
+      if (risk === 'expired') return '<span class="tag tag-critical">หมดอายุ</span>';
+      if (risk === 'critical') return `<span class="tag tag-critical">${days} วัน</span>`;
+      if (risk === 'warning') return `<span class="tag tag-warning">${days} วัน</span>`;
+      if (risk === 'watch') return `<span class="tag tag-watch">${days} วัน</span>`;
+      return '<span class="tag tag-ok">ปกติ</span>';
+    }
+
+    function getRiskLevel(days, expDate) {
+      if (!expDate) return 'expired';
+      if (days < 0) return 'expired';
+      if (days <= 30) return 'critical';
+      if (days <= 60) return 'warning';
+      if (days <= 90) return 'watch';
+      return 'safe';
+    }
+
+    function getRiskScore(risk) {
+      const score = { expired: 5, critical: 4, warning: 3, watch: 2, safe: 0 };
+      return score[risk] ?? 0;
+    }
+
+    function getActionText(risk) {
+      const actions = {
+        expired: 'แยกยาออกจากกล่องและปิดใช้งาน lot',
+        critical: 'เปลี่ยน lot หรือ rotate ภายในรอบนี้',
+        warning: 'วางแผน rotate และติดตามในรอบถัดไป',
+        watch: 'เฝ้าระวังและตรวจซ้ำใน 30 วัน',
+        safe: 'ติดตามตามรอบปกติ'
+      };
+      return actions[risk] || '-';
+    }
+
+    function barClass(risk) {
+      if (risk === 'expired' || risk === 'critical') return 'bg-danger';
+      if (risk === 'warning') return 'bg-warning';
+      if (risk === 'watch') return 'bg-primary';
+      return 'bg-success';
+    }
+
+    function daysLeft(value) {
+      if (!value) return -9999;
+      const today = new Date();
+      const exp = new Date(value);
+      if (isNaN(exp.getTime())) return -9999;
+      today.setHours(0, 0, 0, 0);
+      exp.setHours(0, 0, 0, 0);
+      return Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function getMedicineName(id) {
+      const item = medicines.find(med => sameId(med.medicine_id, id));
+      return item ? `${item.medicine_name || ''} ${item.strength || ''}`.trim() : id || '-';
+    }
+
+    function getDepartmentName(id) {
+      const item = departments.find(dep => sameId(dep.department_id, id));
+      return item ? item.department_name : '';
+    }
+
+    function formatThaiDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+      return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function setReportDate() {
+      document.getElementById('reportDate').innerText = 'วันที่รายงาน ' + new Date().toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function mergeById(primary, secondary, key) {
+      const map = new Map();
+      [...primary, ...secondary].forEach(item => {
+        if (item && item[key]) map.set(String(item[key]), item);
+      });
+      return Array.from(map.values());
+    }
+
+    function sameId(a, b) {
+      return String(a ?? '') === String(b ?? '');
+    }
+
+    function escapeHtml(text) {
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
 
 </body>
+
 </html>
