@@ -187,18 +187,20 @@ document.addEventListener('DOMContentLoaded', function() {
   loadMedicines();
 });
 
-async function loadMedicines() {
+async function loadMedicines(showLoader = true) {
   try {
-    Swal.fire({
-      title: 'กำลังโหลดข้อมูล',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+    if (showLoader) {
+      Swal.fire({
+        title: 'กำลังโหลดข้อมูล',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+    }
 
     const res = await fetch(API_URL + '?action=getMedicines&token=' + encodeURIComponent(getToken()));
     const result = await res.json();
 
-    Swal.close();
+    if (showLoader) Swal.close();
 
     if (!result.success) {
       Swal.fire('ผิดพลาด', result.message, 'error');
@@ -289,9 +291,9 @@ document.getElementById('medicineForm').addEventListener('submit', async functio
     const result = await res.json();
 
     if (result.success) {
-      Swal.fire('สำเร็จ', result.message, 'success');
       resetForm();
-      loadMedicines();
+      await loadMedicines(false);
+      Swal.fire({ icon:'success', title:'บันทึกแล้ว', text:result.message, timer:1200, showConfirmButton:false });
     } else {
       Swal.fire('ไม่สำเร็จ', result.message, 'error');
     }
@@ -348,8 +350,8 @@ async function deleteMedicine(medicineId) {
     const result = await res.json();
 
     if (result.success) {
-      Swal.fire('สำเร็จ', result.message, 'success');
-      loadMedicines();
+      await loadMedicines(false);
+      Swal.fire({ icon:'success', title:'อัปเดตแล้ว', text:result.message, timer:1200, showConfirmButton:false });
     } else {
       Swal.fire('ไม่สำเร็จ', result.message, 'error');
     }

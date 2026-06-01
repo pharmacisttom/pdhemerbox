@@ -328,18 +328,20 @@ document.addEventListener('DOMContentLoaded', function() {
   loadBoxSetupData();
 });
 
-async function loadBoxSetupData() {
+async function loadBoxSetupData(showLoader = true) {
   try {
-    Swal.fire({
-      title: 'กำลังโหลดข้อมูล',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
+    if (showLoader) {
+      Swal.fire({
+        title: 'กำลังโหลดข้อมูล',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+    }
 
     const res = await fetch(API_URL + '?action=getBoxSetupData&token=' + encodeURIComponent(getToken()));
     const result = await res.json();
 
-    Swal.close();
+    if (showLoader) Swal.close();
 
     if (!result.success) {
       Swal.fire('ผิดพลาด', result.message, 'error');
@@ -521,13 +523,18 @@ async function saveData(data) {
     const result = await res.json();
 
     if (result.success) {
-      Swal.fire('สำเร็จ', result.message, 'success');
-
       resetBoxTypeForm();
       resetBoxItemForm();
       resetDepartmentBoxForm();
 
-      loadBoxSetupData();
+      await loadBoxSetupData(false);
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกแล้ว',
+        text: result.message,
+        timer: 1200,
+        showConfirmButton: false
+      });
     } else {
       Swal.fire('ไม่สำเร็จ', result.message, 'error');
     }

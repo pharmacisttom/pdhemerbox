@@ -103,7 +103,7 @@ async function loadData(){
 
 try{
 
-const token = localStorage.getItem("token");
+const token = getToken();
 
 const res = await fetch(
 API_URL +
@@ -241,13 +241,8 @@ if(!confirm.isConfirmed) return;
 
 try{
 
-const token =
-localStorage.getItem("token");
-
-const user =
-JSON.parse(
-localStorage.getItem("user")
-);
+const token = getToken();
+const user = getUser();
 
 const payload = {
 
@@ -276,13 +271,15 @@ await res.json();
 
 if(result.success){
 
+await loadData();
+
 Swal.fire({
 icon:'success',
-title:'สำเร็จ',
-text:result.message
+title:'อัปเดตแล้ว',
+text:result.message,
+timer:1200,
+showConfirmButton:false
 });
-
-loadData();
 
 }else{
 

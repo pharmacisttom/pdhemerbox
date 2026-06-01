@@ -490,10 +490,18 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'บันทึกสำเร็จ',
-                        text: 'เลขที่รายการ: ' + result.request_id
-                    }).then(() => {
-                        window.location.href = 'dashboard.html';
+                        text: 'เลขที่รายการ: ' + result.request_id,
+                        timer: 1800,
+                        showConfirmButton: false
                     });
+
+                    document.getElementById('requestForm').reset();
+                    document.getElementById('usage_datetime').value = getLocalDateTime();
+                    requestItems = [];
+                    renderDepartments();
+                    renderBoxes();
+                    renderMedicines();
+                    renderItems();
                 } else {
                     Swal.fire('บันทึกไม่สำเร็จ', result.message, 'error');
                 }

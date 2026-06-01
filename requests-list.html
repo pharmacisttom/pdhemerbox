@@ -255,8 +255,8 @@ async function updateStatus(requestId, status) {
     const result = await res.json();
 
     if (result.success) {
-      Swal.fire('สำเร็จ', result.message, 'success');
-      loadRequests();
+      await loadRequests();
+      Swal.fire({ icon:'success', title:'อัปเดตแล้ว', text:result.message, timer:1200, showConfirmButton:false });
     } else {
       Swal.fire('ไม่สำเร็จ', result.message, 'error');
     }
